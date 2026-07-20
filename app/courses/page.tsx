@@ -5,6 +5,7 @@ import { ExternalLink, Search, ChevronDown, X, ChevronLeft, ChevronRight as Chev
 import { COURSES, ALL_TAGS, ALL_MONTHS, CourseCategory, SkillLevel, Course } from "@/lib/courses";
 import { useLang } from "@/components/Navbar";
 import { useClientTranslation } from "@/lib/useClientTranslation";
+import i18n from "@/lib/i18n";
 
 const CATEGORIES: (CourseCategory | "All")[] = ["All", "Game", "Skill Badge"];
 const SKILL_LEVELS: SkillLevel[] = ["Beginner", "Intermediate", "Advanced"];
@@ -192,8 +193,16 @@ export default function CoursesPage() {
   }, [search, activeCategory, selectedTags, selectedMonths, selectedLevels]);
 
   const checkCompleted = (course: Course) => {
-    const cTitle = t(course.titleKey).toLowerCase().trim();
-    return completedTitles.some((b) => b.includes(cTitle) || cTitle.includes(b));
+    // Always use EN title for matching — badge titles from Google profiles are always in English
+    const enTitle = i18n.getFixedT("en")(course.titleKey).toLowerCase().trim();
+    return completedTitles.some((b) => {
+      if (b === enTitle) return true;
+      const minLen = Math.min(b.length, enTitle.length);
+      if (minLen >= 6 && (b.includes(enTitle) || enTitle.includes(b))) return true;
+      const words = enTitle.split(/\s+/).filter(w => w.length > 3);
+      if (words.length >= 2 && words.every(w => b.includes(w))) return true;
+      return false;
+    });
   };
 
   const filtered = useMemo(() => {
