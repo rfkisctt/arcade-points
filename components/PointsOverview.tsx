@@ -12,7 +12,6 @@ import { COURSES } from "@/lib/courses";
 interface Props {
   stats: Stats;
   hasExtraBonus: boolean;
-  setHasExtraBonus: (v: boolean) => void;
   earnedBadgeTitles?: string[];
 }
 
@@ -48,7 +47,7 @@ function getMissingSkillBadges(
   }));
 }
 
-export function PointsOverview({ stats, hasExtraBonus, setHasExtraBonus, earnedBadgeTitles = [] }: Props) {
+export function PointsOverview({ stats, hasExtraBonus, earnedBadgeTitles = [] }: Props) {
   const { t } = useClientTranslation();
   const { lang } = useLang();
   const [showMissingBadges, setShowMissingBadges] = useState(false);
@@ -71,10 +70,6 @@ export function PointsOverview({ stats, hasExtraBonus, setHasExtraBonus, earnedB
             <span className="text-[52px] font-[800] leading-none text-[#FCAA26]">
               <CountingNumber value={stats.totalPoints} duration={1200} />
             </span>
-            <span className="text-[11px] font-[500] text-[rgba(255,255,255,0.3)] pb-2">
-              {t("pointsOverview.base")}: <CountingNumber value={stats.basePoints} duration={1000} /> · {t("pointsOverview.bonus")}:{" "}
-              <CountingNumber value={stats.currentMilestone.bonus + stats.extraBonusPoint} duration={1000} />
-            </span>
           </div>
         </div>
 
@@ -83,19 +78,7 @@ export function PointsOverview({ stats, hasExtraBonus, setHasExtraBonus, earnedB
             {t(`milestones.${stats.currentMilestone.name}`)}
           </div>
 
-          {stats.currentMilestone.bonus > 0 && (
-            <label className="flex items-center gap-2 bg-[rgba(255,255,255,0.03)] border border-[rgba(255,255,255,0.07)] rounded-[8px] px-3 py-[6px] cursor-pointer hover:bg-[rgba(255,255,255,0.05)] transition-colors">
-              <input
-                type="checkbox"
-                checked={hasExtraBonus}
-                onChange={e => setHasExtraBonus(e.target.checked)}
-                className="accent-[#FCAA26] w-[12px] h-[12px] cursor-pointer shrink-0"
-              />
-              <span className="text-[11px] font-[600] text-[rgba(255,255,255,0.6)] whitespace-nowrap">
-                {t("pointsOverview.bonusGear")}
-              </span>
-            </label>
-          )}
+
         </div>
       </div>
 

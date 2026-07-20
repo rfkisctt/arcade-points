@@ -108,7 +108,7 @@ export default async function OgImage({ params }: { params: { slug: string } }) 
           display: 'flex', justifyContent: 'center',
         }}>
           <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.2)', letterSpacing: 1 }}>
-            arcade-points.vercel.app
+            arcade-pts.vercel.app
           </span>
         </div>
       </div>

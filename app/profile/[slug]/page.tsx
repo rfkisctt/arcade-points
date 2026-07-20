@@ -68,10 +68,6 @@ function PointsOverviewReadonly({ stats, earnedBadgeTitles = [] }: { stats: Stat
             <span className="text-[52px] font-[800] leading-none text-[#FCAA26]">
               <CountingNumber value={stats.totalPoints} duration={1000} />
             </span>
-            <span className="text-[11px] font-medium text-white/30 pb-2">
-              {t("pointsOverview.base")}: <CountingNumber value={stats.basePoints} duration={900} /> · {t("pointsOverview.bonus")}:{" "}
-              <CountingNumber value={stats.currentMilestone.bonus + stats.extraBonusPoint} duration={900} />
-            </span>
           </div>
         </div>
         <div className="flex items-center gap-2 bg-white/[0.04] border border-white/[0.08] rounded-full px-3 h-[28px] text-[11px] font-semibold text-white whitespace-nowrap shrink-0">
@@ -205,11 +201,21 @@ function ShareButton({ slug, disabled }: { slug: string; disabled?: boolean }) {
     }
   };
 
-  const handleDownloadQr = () => {
-    const a = document.createElement("a");
-    a.href = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&bgcolor=141414&color=FCAA26&data=${encodeURIComponent(url)}`;
-    a.download = `qr-profile-${slug}.png`;
-    a.click();
+  const handleDownloadQr = async () => {
+    try {
+      const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=400x400&bgcolor=141414&color=FCAA26&data=${encodeURIComponent(url)}`;
+      const res = await fetch(qrUrl);
+      const blob = await res.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = blobUrl;
+      a.download = `qr-profile-${slug}.png`;
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(blobUrl), 5000);
+    } catch {
+      // fallback: open in new tab
+      window.open(`https://api.qrserver.com/v1/create-qr-code/?size=400x400&bgcolor=141414&color=FCAA26&data=${encodeURIComponent(url)}`, "_blank");
+    }
   };
 
   return (
@@ -458,7 +464,6 @@ export default function ProfilePage() {
               <p className="text-[10px] font-semibold text-white/30 uppercase tracking-widest mb-3">{t("pointsOverview.totalPoin")}</p>
               <div className="flex items-end gap-3 mb-4">
                 <span className="text-[52px] font-[800] leading-none text-[#FCAA26]">{entry.totalPoints}</span>
-                <span className="text-[11px] text-white/30 pb-2">{t("pointsOverview.base")}: {entry.basePoints}</span>
               </div>
               <div className="flex items-center gap-2 bg-white/[0.04] border border-white/[0.08] rounded-full px-3 h-[28px] w-fit text-[11px] font-semibold text-white">
                 {t(`milestones.${entry.milestoneName}`)}

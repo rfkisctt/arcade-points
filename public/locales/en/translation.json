@@ -37,6 +37,7 @@
     "keluar": "Sign out & clear session",
     "pointsUnit": "points",
     "gameLabel": "Game",
+    "triviaLabel": "Trivia",
     "skillLabel": "Skill",
     "confirmLogoutRequireText": "delete my account"
   },

@@ -1,6 +1,6 @@
 "use client";
 
-import { Crown, RefreshCw, Search, Trash2, ArrowUpRight, Gamepad2, HelpCircle, Medal, Download, BarChart2, ChevronDown, EyeOff, Eye } from "lucide-react";
+import { Crown, RefreshCw, Search, Trash2, ArrowUpRight, Gamepad2, Medal, Download, BarChart2, ChevronDown, EyeOff, Eye } from "lucide-react";
 import { useEffect, useState, useCallback, useRef } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
@@ -108,7 +108,7 @@ function ConfirmDeleteModal({
   const { t } = useClientTranslation();
   return (
     <div className="fixed inset-0 z-[100] flex items-center justify-center px-4" style={{ background: "rgba(0,0,0,0.75)" }} onClick={onCancel}>
-      <div className="w-full max-w-[360px] bg-[#141414] border border-white/10 rounded-2xl p-6 shadow-[0_24px_64px_rgba(0,0,0,0.8)]" onClick={e => e.stopPropagation()} style={{ fontFamily: "'seasonSans', sans-serif" }}>
+      <div className="w-full max-w-[360px] bg-[#141414] border border-white/10 rounded-2xl p-6" onClick={e => e.stopPropagation()} style={{ fontFamily: "'seasonSans', sans-serif" }}>
         <p className="text-[14px] font-[700] text-white mb-2">{t("leaderboardComponent.modalDeleteTitle")}</p>
         <p className="text-[12px] font-[400] text-white/50 mb-5 leading-relaxed">{t("leaderboardComponent.modalDeleteBody", { name })}</p>
         <div className="flex gap-2">
@@ -128,7 +128,7 @@ function ConfirmDeleteAllModal({
   const { t } = useClientTranslation();
   return (
     <div className="fixed inset-0 z-[9999] flex items-center justify-center px-4" style={{ background: "rgba(0,0,0,0.85)" }} onClick={onCancel}>
-      <div className="w-full max-w-[360px] bg-[#141414] border border-white/10 rounded-2xl p-6 shadow-[0_24px_64px_rgba(0,0,0,0.8)]" onClick={e => e.stopPropagation()} style={{ fontFamily: "'seasonSans', sans-serif" }}>
+      <div className="w-full max-w-[360px] bg-[#141414] border border-white/10 rounded-2xl p-6" onClick={e => e.stopPropagation()} style={{ fontFamily: "'seasonSans', sans-serif" }}>
         <p className="text-[14px] font-[700] text-white mb-2">{t("leaderboardComponent.modalDeleteAllTitle")}</p>
         <p className="text-[12px] font-[400] text-white/50 mb-5 leading-relaxed">
           {t("leaderboardComponent.modalDeleteAllBody", { count })}
@@ -148,12 +148,11 @@ const SORT_OPTIONS = [
   { value: "points", label: "Points" },
   { value: "games",  label: "Games"  },
   { value: "skills", label: "Skills" },
-  { value: "trivia", label: "Trivia" },
 ] as const;
 
 function SortDropdown({ value, onChange }: {
-  value: "points" | "games" | "skills" | "trivia";
-  onChange: (v: "points" | "games" | "skills" | "trivia") => void;
+  value: "points" | "games" | "skills";
+  onChange: (v: "points" | "games" | "skills") => void;
 }) {
   const { t } = useClientTranslation();
   const [open, setOpen] = useState(false);
@@ -255,10 +254,11 @@ function MilestoneDropdown({ options, value, onChange }: {
 export function Leaderboard({ highlightId }: { highlightId?: string }) {
   const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
   const [search, setSearch] = useState("");
-  const [sortBy, setSortBy] = useState<"points" | "games" | "skills" | "trivia">("points");
+  const [sortBy, setSortBy] = useState<"points" | "games" | "skills">("points");
   const [filterMilestone, setFilterMilestone] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  const [initialLoad, setInitialLoad] = useState(true);  const [mounted, setMounted] = useState(false);
+  const [initialLoad, setInitialLoad] = useState(true);
+  const [cachedCount, setCachedCount] = useState(0);  const [mounted, setMounted] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [mySlug, setMySlug] = useState<string | undefined>(undefined);
   const [myPrevRank, setMyPrevRank] = useState<number | null>(null);
@@ -348,6 +348,7 @@ export function Leaderboard({ highlightId }: { highlightId?: string }) {
     const cached = getCachedEntries();
     if (cached.length > 0) {
       setEntries(cached);
+      setCachedCount(cached.length);
       setLoading(false);
     }
     resolveMySlug();
@@ -385,7 +386,7 @@ export function Leaderboard({ highlightId }: { highlightId?: string }) {
     fetch('/api/leaderboard/resync', {
       method: 'POST',
       headers: { 'x-admin-secret': secret },
-    }).catch(() => {/* silent */});
+    }).catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -425,15 +426,14 @@ export function Leaderboard({ highlightId }: { highlightId?: string }) {
     .sort((a, b) => {
       if (sortBy === "games") return b.gameCount - a.gameCount;
       if (sortBy === "skills") return b.skillCount - a.skillCount;
-      if (sortBy === "trivia") return b.triviaCount - a.triviaCount;
       return b.totalPoints - a.totalPoints;
     });
 
   const milestoneOptions = Array.from(new Set(entries.map(e => e.milestoneName))).sort();
 
   const handleExportCsv = () => {
-    const headers = ["#", "Participant", "Game", "Trivia", "Skill", "Points", "Milestone"];
-    const rows = entries.map((e, i) => [i + 1, e.name, e.gameCount, e.triviaCount, e.skillCount, e.totalPoints, e.milestoneName]);
+    const headers = ["#", "Participant", "Game", "Skill", "Points", "Milestone"];
+    const rows = entries.map((e, i) => [i + 1, e.name, e.gameCount, e.skillCount, e.totalPoints, e.milestoneName]);
 
     const thStyle = `padding:6px 10px;text-align:center;font-weight:bold;white-space:nowrap`;
     const tdCenter = `padding:5px 10px;text-align:center;white-space:nowrap`;
@@ -478,7 +478,7 @@ export function Leaderboard({ highlightId }: { highlightId?: string }) {
       if (!res.ok) handleAdminLogout();
       setDeleteTarget(null);
       load();
-    } catch { /* silent */ }
+    } catch {}
     setDeleteLoading(false);
   };
 
@@ -493,7 +493,7 @@ export function Leaderboard({ highlightId }: { highlightId?: string }) {
       if (!res.ok) handleAdminLogout();
       setDeleteAllConfirm(false);
       load();
-    } catch { /* silent */ }
+    } catch {}
     setDeleteAllLoading(false);
   };
 
@@ -517,7 +517,7 @@ export function Leaderboard({ highlightId }: { highlightId?: string }) {
       } else {
         handleAdminLogout();
       }
-    } catch { /* silent */ }
+    } catch {}
     setToggleHiddenLoading(null);
   };
 
@@ -533,7 +533,7 @@ export function Leaderboard({ highlightId }: { highlightId?: string }) {
       const data = await res.json();
       if (res.ok) {
         setResyncResult(`✓ ${data.updated} updated, ${data.failed} failed`);
-        load(); // refresh leaderboard
+        load();
       } else {
         if (!res.ok && res.status === 401) handleAdminLogout();
         setResyncResult(`✗ ${data.error || 'Failed'}`);
@@ -546,7 +546,7 @@ export function Leaderboard({ highlightId }: { highlightId?: string }) {
   return (
     <>
       {rankUpToast !== null && typeof document !== "undefined" && createPortal(
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[9999] flex items-center gap-2 px-5 py-3 bg-[#141414] border border-[#FCAA26]/30 rounded-xl text-[13px] font-[700] text-[#FCAA26] shadow-[0_8px_32px_rgba(0,0,0,0.7)] transition-all duration-500 animate-bounce-once">
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[9999] flex items-center gap-2 px-5 py-3 bg-[#141414] border border-[#FCAA26]/30 rounded-xl text-[13px] font-[700] text-[#FCAA26] transition-all duration-500 animate-bounce-once">
           {t("leaderboardComponent.rankUpToast", { rank: rankUpToast })}
         </div>,
         document.body
@@ -572,7 +572,6 @@ export function Leaderboard({ highlightId }: { highlightId?: string }) {
       )}
 
       <div className="bg-[#161616] border border-white/[0.08] rounded-[10px] overflow-hidden">
-        {/* Admin stats panel */}
         {isAdmin && showAdminStats && (
           <div className="px-5 py-3 bg-[#161616] border-b border-white/[0.06] flex flex-wrap gap-4 items-center">
             <span className="text-[11px] font-[600] text-white/50">{t("leaderboardComponent.adminStatsLabel", { total: entries.length, avg: avgPoints })}</span>
@@ -586,7 +585,6 @@ export function Leaderboard({ highlightId }: { highlightId?: string }) {
           </div>
         )}
 
-        {/* Header */}
         <div className="px-5 py-4 border-b border-white/[0.06] flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="flex items-center gap-3">
             <img src="/logo.png" alt="Arcade Points" className="w-[18px] h-[18px] object-contain" />
@@ -609,7 +607,7 @@ export function Leaderboard({ highlightId }: { highlightId?: string }) {
                 className="h-[32px] pl-[28px] pr-3 bg-[#141414] border border-white/[0.08] rounded-[8px] text-[11px] font-[400] text-white focus:outline-none focus:border-[#FCAA26] transition-colors placeholder:text-white/20 w-[140px]" />
             </div>
             <button
-              onClick={() => { setLoading(true); load(); }}
+              onClick={() => load()}
               className="w-[32px] h-[32px] flex items-center justify-center rounded-[8px] bg-[#141414] border border-white/[0.08] text-white/30 hover:text-white hover:border-white/[0.2] transition-all"
               title="Refresh"
             >
@@ -652,12 +650,14 @@ export function Leaderboard({ highlightId }: { highlightId?: string }) {
           </div>
         </div>
 
-        {(filtered.length > 0 || initialLoad) && (
-          <div className={`px-5 py-3 grid gap-3 border-b border-white/[0.04] ${isAdmin ? "grid-cols-[32px_1fr_40px_40px_40px_56px_96px_28px]" : "grid-cols-[32px_1fr_40px_40px_40px_56px_96px]"}`}>
+        {(filtered.length > 0 || (initialLoad && cachedCount > 0)) && (
+          <div
+            className={`px-5 py-3 grid border-b border-white/[0.04]`}
+            style={{ gridTemplateColumns: isAdmin ? "32px 1fr 40px 40px 56px 96px 28px" : "32px 1fr 40px 40px 56px 96px", columnGap: "12px" }}
+          >
             <span className="text-[10px] font-[600] text-white/25 uppercase tracking-wider">#</span>
             <span className="text-[10px] font-[600] text-white/25 uppercase tracking-wider">{t("leaderboardComponent.colParticipant")}</span>
             <div className="flex justify-end" title="Game"><Gamepad2 className="w-[11px] h-[11px] text-white/25" /></div>
-            <div className="flex justify-end" title="Trivia"><HelpCircle className="w-[11px] h-[11px] text-white/25" /></div>
             <div className="flex justify-end" title="Skill Badge (count)"><Medal className="w-[11px] h-[11px] text-white/25" /></div>
             <span className="text-[10px] font-[600] text-white/25 uppercase tracking-wider text-center">{t("leaderboardComponent.colPoints")}</span>
             <span className="text-[10px] font-[600] text-white/25 uppercase tracking-wider text-center">{t("leaderboardComponent.colMilestone")}</span>
@@ -666,9 +666,10 @@ export function Leaderboard({ highlightId }: { highlightId?: string }) {
         )}
 
         {initialLoad ? (
-          <div className="w-full flex flex-col gap-0">
-              {[...Array(4)].map((_, i) => (
-                <div key={i} className={`px-5 py-4 grid grid-cols-[32px_1fr_40px_40px_40px_56px_96px] gap-3 items-center border-b border-white/[0.03] last:border-0`}>
+          cachedCount > 0 ? (
+            <div className="w-full flex flex-col gap-0">
+              {[...Array(cachedCount)].map((_, i) => (
+                <div key={i} className="px-5 py-4 grid items-center border-b border-white/[0.03] last:border-0" style={{ gridTemplateColumns: "32px 1fr 40px 40px 56px 96px", columnGap: "12px" }}>
                   <div className="w-[26px] h-[26px] rounded-full bg-white/[0.04] animate-pulse" />
                   <div className="flex items-center gap-3">
                     <div className="w-[30px] h-[30px] rounded-full bg-white/[0.04] animate-pulse shrink-0" />
@@ -678,13 +679,17 @@ export function Leaderboard({ highlightId }: { highlightId?: string }) {
                     </div>
                   </div>
                   <div className="h-[10px] rounded-full bg-white/[0.04] animate-pulse ml-auto w-[20px]" />
-                  <div className="h-[10px] rounded-full bg-white/[0.03] animate-pulse ml-auto w-[16px]" />
                   <div className="h-[10px] rounded-full bg-white/[0.04] animate-pulse ml-auto w-[20px]" />
                   <div className="h-[22px] rounded-full bg-white/[0.04] animate-pulse mx-auto w-[40px]" />
                   <div className="h-[22px] rounded-full bg-white/[0.03] animate-pulse mx-auto w-[80px]" />
                 </div>
               ))}
             </div>
+          ) : (
+            <div className="py-[48px] flex items-center justify-center">
+              <div className="w-4 h-4 border-2 border-white/10 border-t-white/40 rounded-full animate-spin" />
+            </div>
+          )
         ) : filtered.length === 0 ? (
           <div className="py-[48px] text-center">
             <p className="text-[12px] font-[400] text-white/25">{entries.length === 0 ? t("leaderboardComponent.empty") : t("leaderboardComponent.noMatch", { name: search })}</p>
@@ -701,7 +706,8 @@ export function Leaderboard({ highlightId }: { highlightId?: string }) {
               return (
                 <div
                   key={entry.slug || entry.name}
-                  className={`group px-5 py-4 grid gap-3 items-center border-b border-white/[0.03] last:border-0 transition-colors duration-150 ${isAdmin ? "grid-cols-[32px_1fr_40px_40px_40px_56px_96px_28px]" : "grid-cols-[32px_1fr_40px_40px_40px_56px_96px]"} ${isMe ? "bg-[rgba(255,135,9,0.04)] border-l-2 border-l-[#FCAA26]" : entry.hidden ? "bg-[rgba(255,255,255,0.01)] opacity-50" : "hover:bg-white/[0.02]"}`}
+                  className={`group px-5 py-4 grid items-center border-b border-white/[0.03] last:border-0 transition-colors duration-150 ${isMe ? "bg-[rgba(255,135,9,0.04)] border-l-2 border-l-[#FCAA26]" : entry.hidden ? "bg-[rgba(255,255,255,0.01)] opacity-50" : "hover:bg-white/[0.02]"}`}
+                  style={{ gridTemplateColumns: isAdmin ? "32px 1fr 40px 40px 56px 96px 28px" : "32px 1fr 40px 40px 56px 96px", columnGap: "12px" }}
                 >
                   <RankCell rank={rank} />
                   <div className="flex items-center gap-3 min-w-0">
@@ -727,7 +733,6 @@ export function Leaderboard({ highlightId }: { highlightId?: string }) {
                     </div>
                   </div>
                   <p className="text-[11px] font-[500] text-white/40 text-right">{entry.gameCount}</p>
-                  <p className="text-[11px] font-[500] text-white/40 text-right">{entry.triviaCount}</p>
                   <p className="text-[11px] font-[500] text-white/40 text-right">{entry.skillCount}</p>
                   <p className="text-[13px] font-[700] text-[#FCAA26] text-center">{entry.totalPoints}</p>
                   <p className="text-[10px] font-[500] text-white/35 bg-[#141414] border border-white/[0.06] px-[8px] py-[3px] rounded-full whitespace-nowrap overflow-hidden text-ellipsis text-center mx-auto">

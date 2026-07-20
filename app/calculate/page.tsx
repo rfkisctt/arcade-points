@@ -31,7 +31,7 @@ function CalculatePageInner() {
   const [error, setError] = useState<string | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [hasExtraBonus, setHasExtraBonus] = useState(false);
+  const [hasExtraBonus] = useState(true);
   const [savedToast, setSavedToast] = useState(false);
 
   const handleFetch = useCallback(async (urlOverride?: string) => {
@@ -41,7 +41,6 @@ function CalculatePageInner() {
     setError(null);
     setProfile(null);
     setSearchQuery("");
-    setHasExtraBonus(false);
     try {
       const res = await fetch("/api/fetch-profile", {
         method: "POST",
@@ -70,12 +69,10 @@ function CalculatePageInner() {
   useEffect(() => {
     const savedProfile = localStorage.getItem("arcade_last_profile");
     const savedUrl = localStorage.getItem("arcade_last_profile_url");
-    const savedExtra = localStorage.getItem("arcade_last_extra_bonus");
     if (savedProfile) {
       try {
         setProfile(JSON.parse(savedProfile));
         if (savedUrl) setProfileUrl(savedUrl);
-        if (savedExtra) setHasExtraBonus(savedExtra === "true");
       } catch {
       }
     }
@@ -84,12 +81,10 @@ function CalculatePageInner() {
   useEffect(() => {
     const load = () => {
       const savedProfile = localStorage.getItem("arcade_last_profile");
-      const savedExtra = localStorage.getItem("arcade_last_extra_bonus");
       if (savedProfile) {
         try {
           const parsed = JSON.parse(savedProfile);
           setProfile(prev => JSON.stringify(prev) === savedProfile ? prev : parsed);
-          if (savedExtra) setHasExtraBonus(prev => prev === (savedExtra === "true") ? prev : (savedExtra === "true"));
         } catch {
         }
       }
@@ -190,7 +185,7 @@ function CalculatePageInner() {
   return (
     <div className="relative z-[1] pt-[72px]">
 
-      <div className={`fixed bottom-6 right-6 z-50 flex items-center gap-2 px-4 py-3 bg-[#141414] border border-[#FCAA26]/30 rounded-xl text-[12px] font-[600] text-[#FCAA26] shadow-[0_8px_32px_rgba(0,0,0,0.6)] transition-all duration-300 ${savedToast ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2 pointer-events-none"}`}>
+      <div className={`fixed bottom-6 right-6 z-50 flex items-center gap-2 px-4 py-3 bg-[#141414] border border-[#FCAA26]/30 rounded-xl text-[12px] font-[600] text-[#FCAA26] transition-all duration-300 ${savedToast ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2 pointer-events-none"}`}>
         <Check className="w-[13px] h-[13px]" />
         <span>{t("calculate.saved")}</span>
       </div>
@@ -304,7 +299,6 @@ function CalculatePageInner() {
               <PointsOverview
                 stats={stats}
                 hasExtraBonus={hasExtraBonus}
-                setHasExtraBonus={setHasExtraBonus}
                 earnedBadgeTitles={profile.badges
                   .filter(b => b.category === "Skill Badge")
                   .map(b => b.title)}
