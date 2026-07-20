@@ -6,6 +6,9 @@ import { Footer } from "@/components/Footer";
 export const metadata: Metadata = {
   title: "Arcade Points | Google Cloud Arcade Facilitator 2026 Points Calculator",
   description: "Automatically calculate your Google Cloud Arcade Facilitator 2026 points. Track badges, view your score, and check the public leaderboard.",
+  verification: {
+    google: "_PhvYjgeuVrpi5hIi78lb8D301iWUjP2BKNNfuQAHMg",
+  },
   icons: {
     icon: "/logo.png",
     shortcut: "/logo.png",
