@@ -1,0 +1,162 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@font-face {
+  font-family: 'seasonSans';
+  src: url('/fonts/SeasonSans-Light.otf') format('opentype');
+  font-weight: 300;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'seasonSans';
+  src: url('/fonts/SeasonSans-Regular.otf') format('opentype');
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'seasonSans';
+  src: url('/fonts/SeasonSans-Medium.otf') format('opentype');
+  font-weight: 500;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'seasonSans';
+  src: url('/fonts/SeasonSans-SemiBold.otf') format('opentype');
+  font-weight: 600;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'seasonSans';
+  src: url('/fonts/SeasonSans-Bold.otf') format('opentype');
+  font-weight: 700;
+  font-display: swap;
+}
+
+/* ── Season Mix (display/heading font) ── */
+@font-face {
+  font-family: 'seasonMix';
+  src: url('/fonts/SeasonMix-Light.otf') format('opentype');
+  font-weight: 300;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'seasonMix';
+  src: url('/fonts/SeasonMix-Regular.otf') format('opentype');
+  font-weight: 400;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'seasonMix';
+  src: url('/fonts/SeasonMix-Medium.otf') format('opentype');
+  font-weight: 500;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'seasonMix';
+  src: url('/fonts/SeasonMix-SemiBold.otf') format('opentype');
+  font-weight: 600;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'seasonMix';
+  src: url('/fonts/SeasonMix-Bold.otf') format('opentype');
+  font-weight: 700;
+  font-display: swap;
+}
+
+:root {
+  --bg: #141414;
+  --bg-card: #181818;
+  --bg-elevated: #1f1f1f;
+  --bg-deep: #111111;
+  --border: rgba(255,255,255,0.08);
+  --border-subtle: rgba(255,255,255,0.05);
+  --text: #fafafa;
+  --primary: #FCAA26;
+  --orange: #FCAA26;
+}
+
+html, body {
+  background: #141414;
+  color: #fafafa;
+  font-family: 'seasonSans', system-ui, -apple-system, sans-serif;
+  font-weight: 400;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  scrollbar-gutter: stable;
+}
+
+h1, h2, h3 {
+  font-family: 'seasonMix', system-ui, sans-serif;
+}
+
+* {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,0.07) transparent;
+}
+*::-webkit-scrollbar { width: 4px; height: 4px; }
+*::-webkit-scrollbar-track { background: transparent; }
+*::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.07); border-radius: 100px; }
+*::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.13); }
+
+.guide-lines {
+  pointer-events: none;
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  display: none;
+}
+@media (min-width: 1024px) {
+  .guide-lines { display: block; }
+}
+.guide-lines-inner {
+  position: relative;
+  margin: 0 auto;
+  height: 100%;
+  max-width: 1200px;
+}
+.guide-lines-inner::before,
+.guide-lines-inner::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 1px;
+  border-left: 1px dashed rgba(255,255,255,0.07);
+}
+.guide-lines-inner::before { left: 0; }
+.guide-lines-inner::after  { right: 0; }
+
+.page-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding-left: 1.5rem;
+  padding-right: 1.5rem;
+}
+
+.divider {
+  width: 100%;
+  border-bottom: 1px dashed rgba(255,255,255,0.06);
+}
+
+.hero-chat-box {
+  background: #181818;
+  border: 1px solid rgba(255,255,255,0.1);
+  border-radius: 14px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.hero-chat-box:focus-within {
+  border-color: rgba(255,255,255,0.2);
+  box-shadow: 0 0 0 3px rgba(255,135,9,0.05);
+}
+
+.slide-out-left  { animation: slideOutLeft  0.14s cubic-bezier(0.4,0,1,1) forwards; }
+.slide-out-right { animation: slideOutRight 0.14s cubic-bezier(0.4,0,1,1) forwards; }
+.slide-in-left   { animation: slideInLeft   0.2s  cubic-bezier(0,0,0.2,1) forwards; }
+.slide-in-right  { animation: slideInRight  0.2s  cubic-bezier(0,0,0.2,1) forwards; }
+
+@keyframes slideOutLeft  { from{transform:translateX(0);opacity:1} to{transform:translateX(-14px);opacity:0} }
+@keyframes slideOutRight { from{transform:translateX(0);opacity:1} to{transform:translateX(14px);opacity:0} }
+@keyframes slideInLeft   { from{transform:translateX(14px);opacity:0} to{transform:translateX(0);opacity:1} }
+@keyframes slideInRight  { from{transform:translateX(-14px);opacity:0} to{transform:translateX(0);opacity:1} }

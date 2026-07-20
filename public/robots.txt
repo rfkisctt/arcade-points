@@ -1,0 +1,10 @@
+# robots.txt — Arcade Points
+# https://arcade-points.vercel.app
+
+User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /_next/
+
+# Sitemap
+Sitemap: https://arcade-points.vercel.app/sitemap.xml
