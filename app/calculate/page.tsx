@@ -115,7 +115,7 @@ function CalculatePageInner() {
     localStorage.setItem("arcade_last_profile_url", trimmedUrl);
     localStorage.setItem("arcade_last_extra_bonus", hasExtraBonus ? "true" : "false");
 
-    saveToLeaderboard(trimmedUrl, hasExtraBonus).then((result) => {
+    saveToLeaderboard(trimmedUrl, true).then((result) => {
       if (result.ok && result.profile) {
         const id = trimmedUrl;
         setCurrentUser({ id, name: result.profile.name, avatarUrl: result.profile.avatarUrl, profileUrl: trimmedUrl });

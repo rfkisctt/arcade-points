@@ -51,14 +51,12 @@ function useGithubStars(repo: string) {
     const cacheKey = `gh_stars_${repo}`;
     const cached = sessionStorage.getItem(cacheKey);
     if (cached) { setStars(Number(cached)); return; }
-    fetch(`https://api.github.com/repos/${repo}`, {
-      headers: { Accept: "application/vnd.github+json" },
-    })
+    fetch("/api/github-stars")
       .then(r => r.json())
       .then(d => {
-        if (typeof d.stargazers_count === "number") {
-          setStars(d.stargazers_count);
-          sessionStorage.setItem(cacheKey, String(d.stargazers_count));
+        if (typeof d.stars === "number") {
+          setStars(d.stars);
+          sessionStorage.setItem(cacheKey, String(d.stars));
         }
       })
       .catch(() => {});
@@ -197,9 +195,7 @@ function AccountMenu({ user, onClose, onLogoutRequest }: { user: CurrentUser; on
     if (!user.profileUrl || syncing) return;
     setSyncing(true); setSyncMsg("");
     try {
-      const lastStatsRaw = localStorage.getItem("arcade_last_stats");
-      const hasExtraBonus = lastStatsRaw ? JSON.parse(lastStatsRaw).extraBonusPoint > 0 : false;
-        const result = await saveToLeaderboard(user.profileUrl, hasExtraBonus);
+      const result = await saveToLeaderboard(user.profileUrl, true);
       if (!result.ok) throw new Error(result.error || 'Sync failed');
       if (result.profile && result.stats) {
         localStorage.setItem("arcade_last_profile", JSON.stringify(result.profile));
@@ -297,7 +293,7 @@ function SignInPanel({ onClose }: { onClose: () => void }) {
     }
 
     try {
-      const result = await saveToLeaderboard(trimmed, false);
+      const result = await saveToLeaderboard(trimmed, true);
       if (!result.ok) throw new Error(result.error || t("navbar.fetchProfileError"));
       if (result.profile && result.stats) {
         localStorage.setItem("arcade_last_profile", JSON.stringify(result.profile));
@@ -418,9 +414,7 @@ export function Navbar() {
     if (lastSync && now - parseInt(lastSync) < 30 * 60 * 1000) return;
     const syncProfile = async () => {
       try {
-        const lastStatsRaw = localStorage.getItem("arcade_last_stats");
-        const hasExtraBonus = lastStatsRaw ? JSON.parse(lastStatsRaw).extraBonusPoint > 0 : false;
-          const result = await saveToLeaderboard(user.profileUrl!, hasExtraBonus);
+        const result = await saveToLeaderboard(user.profileUrl!, true);
         if (result.ok && result.profile && result.stats) {
           const serverStats = result.stats as Record<string, unknown>;
           localStorage.setItem("arcade_last_profile", JSON.stringify(result.profile));

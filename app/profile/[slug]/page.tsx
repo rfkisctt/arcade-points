@@ -348,13 +348,7 @@ export default function ProfilePage() {
       const { html } = await profileRes.json();
       const parsed = parseProfileHtml(html);
       setProfile(parsed);
-      const statsNoBonus = calculateStats(parsed, false);
-      const statsWithBonus = calculateStats(parsed, true);
-      const storedTotal = data.totalPoints;
-      const hasExtraBonusInferred =
-        Math.abs(statsWithBonus.totalPoints - storedTotal) <
-        Math.abs(statsNoBonus.totalPoints - storedTotal);
-      setStats(calculateStats(parsed, hasExtraBonusInferred));
+      setStats(calculateStats(parsed, true));
       setStatus("done");
     } catch (err) {
       setStatus("error");
