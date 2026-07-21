@@ -2,7 +2,6 @@ export const POINT_RULES = {
   game: 1,
   trivia: 0,
   skillBadgePerPoint: 2,
-  course: 0,
 };
 
 export const MILESTONES = [

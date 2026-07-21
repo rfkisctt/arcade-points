@@ -5,7 +5,7 @@ import { useEffect, useState, useCallback } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
 import { ArrowLeft, Loader2, AlertCircle, RefreshCw, QrCode, Link2, Check, Gamepad2, Medal, ChevronDown, ChevronUp } from "lucide-react";
-import { parseProfileHtml, calculateStats } from "@/lib/utils";
+import { calculateStats } from "@/lib/utils";
 import { Profile, Stats } from "@/lib/types";
 import { ProfileCard } from "@/components/ProfileCard";
 import { BadgeInventory } from "@/components/BadgeInventory";
@@ -345,10 +345,9 @@ export default function ProfilePage() {
         return;
       }
 
-      const { html } = await profileRes.json();
-      const parsed = parseProfileHtml(html);
-      setProfile(parsed);
-      setStats(calculateStats(parsed, true));
+      const { profile: fetchedProfile } = await profileRes.json();
+      setProfile(fetchedProfile);
+      setStats(calculateStats(fetchedProfile, true));
       setStatus("done");
     } catch (err) {
       setStatus("error");

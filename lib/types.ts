@@ -1,4 +1,4 @@
-export type BadgeCategory = "Game" | "Trivia" | "Skill Badge" | "Course" | "Uncategorized";
+export type BadgeCategory = "Game" | "Trivia" | "Skill Badge" | "Completion Badge" | "Uncategorized";
 
 export interface Badge {
   title: string;

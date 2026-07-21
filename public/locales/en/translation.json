@@ -288,7 +288,8 @@
   },
   "statsBar": {
     "games": "Games",
-    "skills": "Skills"
+    "skills": "Skills",
+    "completion": "Completion"
   },
   "footer": {
     "desc": "Automatic points calculation for Google Cloud Arcade Facilitator 2026. Track milestones and see your ranking.",

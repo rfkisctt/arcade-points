@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
+import { fetchAndVerifyProfile } from '@/lib/serverUtils';
 
 const rateMap = new Map<string, { count: number; resetAt: number }>();
 function checkRate(ip: string): boolean {
@@ -53,30 +54,11 @@ export async function GET(
       return NextResponse.json({ error: 'Invalid profile URL.' }, { status: 400 });
     }
 
-    const res = await fetch(profileUrl, {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (compatible; ArcadePoints/1.0)',
-        'Accept': 'text/html',
-      },
-      signal: AbortSignal.timeout(10_000),
-    });
-
-    if (!res.ok) {
-      return NextResponse.json({ error: 'Gagal memuat profil.' }, { status: 502 });
-    }
-
-    const contentType = res.headers.get('content-type') ?? '';
-    if (!contentType.includes('text/html')) {
-      return NextResponse.json({ error: 'Response bukan HTML.' }, { status: 502 });
-    }
-
-    const html = await res.text();
-    if (html.length > 5_000_000) {
-      return NextResponse.json({ error: 'Response terlalu besar.' }, { status: 502 });
-    }
+    // Use fetchAndVerifyProfile which includes badge classification (completion badge detection)
+    const { profile } = await fetchAndVerifyProfile(profileUrl, true);
 
     return NextResponse.json(
-      { html },
+      { profile },
       { headers: { 'Cache-Control': 'no-store' } }
     );
   } catch (err) {

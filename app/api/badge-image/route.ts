@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const cache = new Map<string, { url: string; ts: number }>();
+const cache = new Map<string, { url: string; badgeType: string | null; ts: number }>();
 const CACHE_TTL = 60 * 60 * 1000;
 
 export async function GET(req: NextRequest) {
@@ -11,7 +11,7 @@ export async function GET(req: NextRequest) {
 
   const cached = cache.get(courseId);
   if (cached && Date.now() - cached.ts < CACHE_TTL) {
-    return NextResponse.json({ imageUrl: cached.url });
+    return NextResponse.json({ imageUrl: cached.url, badgeType: cached.badgeType });
   }
 
   try {
@@ -24,9 +24,29 @@ export async function GET(req: NextRequest) {
       next: { revalidate: 3600 },
     });
 
-    if (!res.ok) return NextResponse.json({ imageUrl: null });
+    if (!res.ok) return NextResponse.json({ imageUrl: null, badgeType: null });
 
     const html = await res.text();
+    const lower = html.toLowerCase();
+
+    // Detect badge type from page content
+    // Skills Boost uses "completion_badge" or "skill_badge" in their JSON/data
+    let badgeType: string | null = null;
+    if (lower.includes('"completion_badge"') || lower.includes('completion-badge') ||
+        lower.includes('"completion badge"') || lower.includes("'completion_badge'")) {
+      badgeType = 'completion';
+    } else if (lower.includes('"skill_badge"') || lower.includes('skill-badge') ||
+               lower.includes('"skill badge"') || lower.includes("'skill_badge'")) {
+      badgeType = 'skill';
+    }
+
+    // Also check for "Completion Badge" text in visible content (like og:description)
+    if (!badgeType) {
+      const completionMatch = /completion badge/i.test(html);
+      const skillMatch = /skill badge/i.test(html);
+      if (completionMatch && !skillMatch) badgeType = 'completion';
+      else if (skillMatch) badgeType = 'skill';
+    }
 
     const patterns = [
       /content="(https:\/\/cdn\.qwiklabs\.com\/[^"]+)"/g,
@@ -60,10 +80,12 @@ export async function GET(req: NextRequest) {
       }
     }
 
-    if (imageUrl) cache.set(courseId, { url: imageUrl, ts: Date.now() });
+    if (imageUrl || badgeType) {
+      cache.set(courseId, { url: imageUrl ?? '', badgeType, ts: Date.now() });
+    }
 
-    return NextResponse.json({ imageUrl: imageUrl ?? null });
+    return NextResponse.json({ imageUrl: imageUrl ?? null, badgeType });
   } catch {
-    return NextResponse.json({ imageUrl: null });
+    return NextResponse.json({ imageUrl: null, badgeType: null });
   }
 }

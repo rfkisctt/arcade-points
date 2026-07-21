@@ -5,7 +5,7 @@ export function categorizeBadge(title: string): BadgeCategory {
   const t = title.toLowerCase();
   if (t.includes("trivia")) return "Trivia";
   if (t.includes("level") || t.includes("arcade") || t.includes("game") || t.includes("baseline") || t.includes("safe spaces")) return "Game";
-  if (t.includes("ai boost bites")) return "Course";
+  if (t.includes("ai boost bites") || t.includes("ai boost bootcamp")) return "Completion Badge";
   return "Skill Badge";
 }
 
@@ -87,14 +87,13 @@ export function parseProfileHtml(html: string): Profile {
 }
 
 export function calculateStats(profile: Profile, hasExtraBonus: boolean): Stats {
-  const counts: Record<BadgeCategory, number> = { Game: 0, Trivia: 0, "Skill Badge": 0, Course: 0, Uncategorized: 0 };
+  const counts: Record<BadgeCategory, number> = { Game: 0, Trivia: 0, "Skill Badge": 0, "Completion Badge": 0, Uncategorized: 0 };
   profile.badges.forEach((b) => { counts[b.category] = (counts[b.category] || 0) + 1; });
 
   const basePoints =
     counts.Game * POINT_RULES.game +
     counts.Trivia * POINT_RULES.trivia +
-    Math.floor(counts["Skill Badge"] / POINT_RULES.skillBadgePerPoint) +
-    counts.Course * POINT_RULES.course;
+    Math.floor(counts["Skill Badge"] / POINT_RULES.skillBadgePerPoint);
 
   let currentMilestone = MILESTONES[0];
   let nextMilestone = MILESTONES[1] || null;

@@ -1,6 +1,7 @@
 import * as cheerio from 'cheerio';
-import { Badge, Profile, Stats } from './types';
+import { Badge, BadgeCategory, Profile, Stats } from './types';
 import { categorizeBadge, calculateStats } from './utils';
+import { isCompletionBadge } from './completionBadgeIds';
 
 const ALLOWED_HOSTNAMES = new Set([
   'cloudskillsboost.google',
@@ -102,9 +103,13 @@ export function parseProfileHtmlServer(html: string): Profile {
     const badgeUrl = linkEl.length > 0 ? linkEl.attr('href') : undefined;
 
     if (title || imageUrl) {
-      const category = title.toLowerCase().includes('ai boost bites')
-        ? 'Course'
+      const baseCategory = title.toLowerCase().includes('ai boost bites') || title.toLowerCase().includes('ai boost bootcamp')
+        ? 'Completion Badge'
         : categorizeBadge(title || 'Uncategorized');
+      // Override to Completion Badge if the image URL is in the known list
+      const category: BadgeCategory = (baseCategory === 'Skill Badge' && isCompletionBadge(imageUrl))
+        ? 'Completion Badge'
+        : baseCategory;
       badges.push({
         title: title || 'Unknown Badge',
         dateEarned: dateEarned || 'Unknown Date',
@@ -112,8 +117,7 @@ export function parseProfileHtmlServer(html: string): Profile {
         category,
         badgeUrl,
       });
-    }
-  });
+    }  });
 
   const filteredBadges = badges.filter(b => b.title !== 'Unknown Badge' || b.imageUrl !== '');
 
@@ -168,6 +172,14 @@ export async function fetchAndVerifyProfile(profileUrl: string, hasExtraBonus: b
 
   const profile = parseProfileHtmlServer(html);
   profile.name = profile.name.replace(/<[^>]*>/g, '').trim().slice(0, 100);
+
+  // Override category for known completion badges using image URL lookup.
+  // Image URLs are IDENTICAL for all users with the same badge — truly global.
+  for (const badge of profile.badges) {
+    if (badge.category === 'Skill Badge' && isCompletionBadge(badge.imageUrl)) {
+      badge.category = 'Completion Badge';
+    }
+  }
 
   const stats = calculateStats(profile, hasExtraBonus);
 
