@@ -33,7 +33,7 @@ export async function POST(request: NextRequest) {
       continue;
     }
     try {
-      const { profile, stats } = await fetchAndVerifyProfile(row.profile_url, false);
+      const { profile, stats } = await fetchAndVerifyProfile(row.profile_url, true);
       const { error: updateErr } = await supabase
         .from('leaderboard')
         .update({

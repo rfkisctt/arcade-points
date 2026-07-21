@@ -38,7 +38,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Not found.' }, { status: 404 });
     }
 
-    const { profile, stats } = await fetchAndVerifyProfile(data.profile_url, false);
+    const { profile, stats } = await fetchAndVerifyProfile(data.profile_url, true);
 
     const { error: updateErr } = await supabase
       .from('leaderboard')
