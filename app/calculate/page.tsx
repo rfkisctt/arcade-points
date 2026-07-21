@@ -49,7 +49,13 @@ function CalculatePageInner() {
       });
       const result = await res.json();
       if (!res.ok) throw new Error(result.error || t("calculate.errorTitle"));
-      setProfile(parseProfileHtml(result.html));
+
+      // Use server-side classified profile if available, fallback to client parse
+      if (result.profile) {
+        setProfile(result.profile);
+      } else {
+        setProfile(parseProfileHtml(result.html));
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : t("navbar.generalError"));
     } finally {

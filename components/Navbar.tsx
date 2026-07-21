@@ -23,6 +23,17 @@ export function LangProvider({ children }: { children: React.ReactNode }) {
       window.history.scrollRestoration = "manual";
       window.scrollTo(0, 0);
     }
+
+    // Invalidate stale localStorage cache when classification logic changes
+    const CACHE_VERSION = "v2_completion";
+    const cacheVersion = localStorage.getItem("arcade_cache_version");
+    if (cacheVersion !== CACHE_VERSION) {
+      localStorage.removeItem("arcade_last_profile");
+      localStorage.removeItem("arcade_last_stats");
+      sessionStorage.removeItem("arcade_last_sync"); // force Navbar auto-sync to re-run
+      localStorage.setItem("arcade_cache_version", CACHE_VERSION);
+    }
+
     const saved = localStorage.getItem("arcade_lang") as Lang | null;
     if (saved === "id" || saved === "en") {
       setLangState(saved);
