@@ -40,7 +40,6 @@ export function getPointHistory(): PointSnapshot[] {
   }
 }
 
-// Mini SVG sparkline
 function Sparkline({ data }: { data: number[] }) {
   if (data.length < 2) return null;
   const w = 120, h = 32, pad = 2;

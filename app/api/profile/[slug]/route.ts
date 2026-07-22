@@ -54,7 +54,6 @@ export async function GET(
       return NextResponse.json({ error: 'Invalid profile URL.' }, { status: 400 });
     }
 
-    // Use fetchAndVerifyProfile which includes badge classification (completion badge detection)
     const { profile } = await fetchAndVerifyProfile(profileUrl, true);
 
     return NextResponse.json(

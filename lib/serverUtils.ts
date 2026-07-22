@@ -106,7 +106,6 @@ export function parseProfileHtmlServer(html: string): Profile {
       const baseCategory = title.toLowerCase().includes('ai boost bites') || title.toLowerCase().includes('ai boost bootcamp')
         ? 'Completion Badge'
         : categorizeBadge(title || 'Uncategorized');
-      // Override to Completion Badge if the image URL is in the known list
       const category: BadgeCategory = (baseCategory === 'Skill Badge' && isCompletionBadge(imageUrl))
         ? 'Completion Badge'
         : baseCategory;
@@ -173,8 +172,6 @@ export async function fetchAndVerifyProfile(profileUrl: string, hasExtraBonus: b
   const profile = parseProfileHtmlServer(html);
   profile.name = profile.name.replace(/<[^>]*>/g, '').trim().slice(0, 100);
 
-  // Override category for known completion badges using image URL lookup.
-  // Image URLs are IDENTICAL for all users with the same badge — truly global.
   for (const badge of profile.badges) {
     if (badge.category === 'Skill Badge' && isCompletionBadge(badge.imageUrl)) {
       badge.category = 'Completion Badge';

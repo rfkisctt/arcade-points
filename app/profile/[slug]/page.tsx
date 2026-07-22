@@ -213,7 +213,6 @@ function ShareButton({ slug, disabled }: { slug: string; disabled?: boolean }) {
       a.click();
       setTimeout(() => URL.revokeObjectURL(blobUrl), 5000);
     } catch {
-      // fallback: open in new tab
       window.open(`https://api.qrserver.com/v1/create-qr-code/?size=400x400&bgcolor=141414&color=FCAA26&data=${encodeURIComponent(url)}`, "_blank");
     }
   };

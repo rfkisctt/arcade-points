@@ -29,18 +29,15 @@ export async function GET(req: NextRequest) {
     const html = await res.text();
     const lower = html.toLowerCase();
 
-    // Detect badge type from page content
-    // Skills Boost uses "completion_badge" or "skill_badge" in their JSON/data
     let badgeType: string | null = null;
     if (lower.includes('"completion_badge"') || lower.includes('completion-badge') ||
         lower.includes('"completion badge"') || lower.includes("'completion_badge'")) {
       badgeType = 'completion';
     } else if (lower.includes('"skill_badge"') || lower.includes('skill-badge') ||
-               lower.includes('"skill badge"') || lower.includes("'skill_badge'")) {
+                lower.includes('"skill badge"') || lower.includes("'skill_badge'")) {
       badgeType = 'skill';
     }
 
-    // Also check for "Completion Badge" text in visible content (like og:description)
     if (!badgeType) {
       const completionMatch = /completion badge/i.test(html);
       const skillMatch = /skill badge/i.test(html);

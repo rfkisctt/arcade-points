@@ -27,7 +27,6 @@ export interface BadgeCacheRow {
 
 const CACHE_TABLE = 'badge_image_cache';
 
-// In-process memory cache to avoid repeated Supabase reads within one request
 const memoryCache = new Map<string, BadgeCategory>();
 
 /**
@@ -39,7 +38,6 @@ export async function getBadgeTypesFromCache(
 ): Promise<Map<string, BadgeCategory>> {
   if (imageUrls.length === 0) return new Map();
 
-  // Check memory cache first
   const result = new Map<string, BadgeCategory>();
   const uncachedUrls: string[] = [];
 
@@ -90,11 +88,9 @@ export async function getBadgeTypesFromCache(
  * the text string embedded in PNG metadata or use background color detection.
  */
 export async function classifyBadgeImage(imageUrl: string): Promise<BadgeCategory> {
-  // Check memory cache
   const memCached = memoryCache.get(imageUrl);
   if (memCached) return memCached;
 
-  // Check Supabase cache
   try {
     const { data } = await supabase
       .from(CACHE_TABLE)
@@ -108,13 +104,10 @@ export async function classifyBadgeImage(imageUrl: string): Promise<BadgeCategor
       return type;
     }
   } catch {
-    // Cache miss is ok, continue to classify
   }
 
-  // Classify by fetching the image
   const badgeType = await detectBadgeTypeFromImage(imageUrl);
 
-  // Store in cache
   await storeBadgeTypeCache(imageUrl, badgeType);
 
   return badgeType;
@@ -155,15 +148,11 @@ async function detectBadgeTypeFromImage(imageUrl: string): Promise<BadgeCategory
     const buffer = await res.arrayBuffer();
     const bytes = new Uint8Array(buffer);
 
-    // Method 1: Check raw bytes for "COMPLETION" text string
-    // PNG files can contain text chunks, and some image tools embed metadata
     const textDecoded = decodeImageText(bytes);
     if (textDecoded.includes('completion')) {
       return 'Completion Badge';
     }
 
-    // Method 2: Check if image has white background
-    // Completion badges always have white bg, skill badges have colored backgrounds
     if (hasWhiteBackground(bytes)) {
       return 'Completion Badge';
     }
@@ -179,11 +168,9 @@ async function detectBadgeTypeFromImage(imageUrl: string): Promise<BadgeCategory
  * PNG tEXt chunks and EXIF data sometimes contain metadata we can search.
  */
 function decodeImageText(bytes: Uint8Array): string {
-  // Convert bytes to string, looking for printable ASCII sequences
   let text = '';
   for (let i = 0; i < Math.min(bytes.length, 50000); i++) {
     const b = bytes[i];
-    // Only printable ASCII
     if (b >= 32 && b < 127) {
       text += String.fromCharCode(b);
     } else {
@@ -211,17 +198,12 @@ function decodeImageText(bytes: Uint8Array): string {
  * bytes clustered at the pixel data regions.
  */
 function hasWhiteBackground(bytes: Uint8Array): boolean {
-  // Check PNG signature: 137 80 78 71 13 10 26 10
   const isPng = bytes[0] === 137 && bytes[1] === 80 && bytes[2] === 78 && bytes[3] === 71;
 
   if (!isPng) {
-    // For JPEG: check first JPEG segment for white background signature
-    // JPEG starts with FF D8
     const isJpeg = bytes[0] === 0xFF && bytes[1] === 0xD8;
     if (!isJpeg) return false;
 
-    // For JPEG, count high-value bytes in the middle section
-    // White pixels in JPEG tend to produce a lot of 0xFF bytes in scan data
     let highBytes = 0;
     const sampleStart = Math.floor(bytes.length * 0.3);
     const sampleEnd = Math.floor(bytes.length * 0.7);
@@ -232,9 +214,6 @@ function hasWhiteBackground(bytes: Uint8Array): boolean {
     return highBytes / sampleSize > 0.35;
   }
 
-  // For PNG: after the IHDR chunk (at byte 33), we have the image data.
-  // Count 0xFF bytes in the compressed IDAT chunks - white pixels compress
-  // to patterns with many 0xFF values
   let highBytes = 0;
   const sampleStart = 33;
   const sampleEnd = Math.min(bytes.length, sampleStart + 20000);
@@ -244,7 +223,6 @@ function hasWhiteBackground(bytes: Uint8Array): boolean {
     if (bytes[i] === 0xFF) highBytes++;
   }
 
-  // Completion badges (white bg) tend to have > 8% 0xFF bytes in compressed data
   return highBytes / sampleSize > 0.08;
 }
 
@@ -279,14 +257,12 @@ export async function classifyBadgeImages(
 ): Promise<Map<string, BadgeCategory>> {
   if (imageUrls.length === 0) return new Map();
 
-  // First bulk-check cache for all URLs
   const cacheResult = await getBadgeTypesFromCache(imageUrls);
   
   const uncached = imageUrls.filter(url => !cacheResult.has(url));
 
   if (uncached.length === 0) return cacheResult;
 
-  // Classify uncached images concurrently (max 10 at a time)
   const CONCURRENCY = 10;
   const results = new Map<string, BadgeCategory>(cacheResult);
 
@@ -317,14 +293,12 @@ export async function classifyBadgeImages(
 export async function classifyUnknownBadges(badges: { badgeUrl?: string }[]): Promise<void> {
   const { extractBadgeId, COMPLETION_BADGE_IDS } = await import('./completionBadgeIds');
 
-  // Collect badge IDs not yet in the known set
   const toCheck: Array<{ id: string; url: string }> = [];
   for (const badge of badges) {
     if (!badge.badgeUrl) continue;
     const id = extractBadgeId(badge.badgeUrl);
     if (!id || COMPLETION_BADGE_IDS.has(id)) continue;
 
-    // Check Supabase cache first
     const cached = await supabase
       .from(CACHE_TABLE)
       .select('badge_type')
@@ -340,7 +314,6 @@ export async function classifyUnknownBadges(badges: { badgeUrl?: string }[]): Pr
 
   if (toCheck.length === 0) return;
 
-  // Fetch badge pages concurrently (max 8 at a time)
   const CONCURRENCY = 8;
   for (let i = 0; i < toCheck.length; i += CONCURRENCY) {
     const batch = toCheck.slice(i, i + CONCURRENCY);
@@ -360,13 +333,11 @@ export async function classifyUnknownBadges(badges: { badgeUrl?: string }[]): Pr
           COMPLETION_BADGE_IDS.add(id);
         }
 
-        // Cache result using badge_id prefix as key
         await supabase.from(CACHE_TABLE).upsert(
           { image_url: `badge_id:${id}`, badge_type: badgeType, classified_at: Date.now() },
           { onConflict: 'image_url' }
         );
       } catch {
-        // Non-fatal, badge stays as Skill Badge
       }
     }));
   }

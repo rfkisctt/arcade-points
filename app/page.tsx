@@ -51,7 +51,6 @@ function useTypewriter(phrases: string[]) {
     };
     timeout = setTimeout(tick, 600);
     return () => clearTimeout(timeout);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return text;

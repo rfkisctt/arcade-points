@@ -50,7 +50,6 @@ function CalculatePageInner() {
       const result = await res.json();
       if (!res.ok) throw new Error(result.error || t("calculate.errorTitle"));
 
-      // Use server-side classified profile if available, fallback to client parse
       if (result.profile) {
         setProfile(result.profile);
       } else {

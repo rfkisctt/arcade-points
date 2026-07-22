@@ -1,8 +1,5 @@
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
-
-// Imported statically to ensure translations are available on both SSR and client,
-// preventing hydration mismatches from i18n async loading.
 import translationId from "../public/locales/id/translation.json";
 import translationEn from "../public/locales/en/translation.json";
 

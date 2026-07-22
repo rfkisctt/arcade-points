@@ -302,7 +302,6 @@ export function Leaderboard({ highlightId }: { highlightId?: string }) {
   const signedOutRef = useRef<{ slug?: string; name?: string } | null>(null);
   const entriesLengthRef = useRef(0);
 
-  // Sync entries length ke ref agar bisa diakses di load tanpa dependency
   useEffect(() => {
     entriesLengthRef.current = entries.length;
   }, [entries.length]);
@@ -483,7 +482,13 @@ export function Leaderboard({ highlightId }: { highlightId?: string }) {
   const endIndex = startIndex + ITEMS_PER_PAGE;
   const paginatedEntries = filtered.slice(startIndex, endIndex);
 
+  const isFirstRenderRef = useRef(true);
+
   useEffect(() => {
+    if (isFirstRenderRef.current) {
+      isFirstRenderRef.current = false;
+      return;
+    }
     setCurrentPage(1);
   }, [search, sortBy, filterMilestone]);
 

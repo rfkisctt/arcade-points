@@ -97,7 +97,6 @@ export function isCompletionBadge(imageUrl: string | undefined): boolean {
   return COMPLETION_BADGE_IMAGE_URLS.has(imageUrl);
 }
 
-// Keep these for backward compat — not used anymore
 export function extractBadgeId(badgeUrl: string | undefined): string | null {
   if (!badgeUrl) return null;
   const match = badgeUrl.match(/\/badges\/(\d+)/);

@@ -40,16 +40,12 @@ export function SmoothScroll() {
     };
   }, []);
 
-  // Scroll ke atas hanya saat navigasi forward, bukan saat back dari profile
   useEffect(() => {
     const prev = prevPathnameRef.current;
     prevPathnameRef.current = pathname;
 
-    // Skip first render
     if (prev === null) return;
 
-    // Jangan scroll ke atas saat back dari profile ke leaderboard
-    // biar posisi pagination tetap terjaga
     if (prev.startsWith("/profile/") && pathname === "/leaderboard") {
       return;
     }

@@ -121,11 +121,9 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Response terlalu besar.' }, { status: 502 });
     }
 
-    // Parse and classify badges server-side so completion badges are correctly categorized
     try {
       const profile = parseProfileHtmlServer(html);
       profile.name = profile.name.replace(/<[^>]*>/g, '').trim().slice(0, 100);
-      // Apply completion badge classification via image URL
       for (const badge of profile.badges) {
         if (badge.category === 'Skill Badge' && isCompletionBadge(badge.imageUrl)) {
           badge.category = 'Completion Badge';
@@ -136,7 +134,6 @@ export async function POST(request: NextRequest) {
         { headers: { 'Cache-Control': 'no-store' } }
       );
     } catch {
-      // Fallback to raw HTML if parsing fails
       return NextResponse.json(
         { html },
         { headers: { 'Cache-Control': 'no-store' } }
