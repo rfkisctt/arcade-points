@@ -52,7 +52,8 @@ export async function GET(request: NextRequest) {
     let query = supabase
       .from('leaderboard')
       .select('slug,name,avatar_url,total_points,base_points,milestone_name,milestone_bonus,game_count,skill_count,trivia_count,saved_at,hidden')
-      .order('total_points', { ascending: false });
+      .order('total_points', { ascending: false })
+      .order('skill_count', { ascending: false });
 
     if (!isAdmin) query = query.eq('hidden', false);
 

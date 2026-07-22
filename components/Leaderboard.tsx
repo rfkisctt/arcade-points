@@ -424,9 +424,9 @@ export function Leaderboard({ highlightId }: { highlightId?: string }) {
     .filter(e => e.name.toLowerCase().includes(search.toLowerCase()))
     .filter(e => filterMilestone ? e.milestoneName === filterMilestone : true)
     .sort((a, b) => {
-      if (sortBy === "games") return b.gameCount - a.gameCount;
+      if (sortBy === "games") return b.gameCount - a.gameCount || b.skillCount - a.skillCount;
       if (sortBy === "skills") return b.skillCount - a.skillCount;
-      return b.totalPoints - a.totalPoints;
+      return b.totalPoints - a.totalPoints || b.skillCount - a.skillCount;
     });
 
   const milestoneOptions = Array.from(new Set(entries.map(e => e.milestoneName))).sort();
