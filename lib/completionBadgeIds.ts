@@ -80,6 +80,8 @@ export const COMPLETION_BADGE_IMAGE_URLS = new Set<string>([
   "https://cdn.qwiklabs.com/6ZDX%2BW1AZnaFpO5lLlthas3gcLpTin%2FX52%2BPitJL%2FZ8%3D",
   // Build Your First Agent with Agent Development Kit (ADK)
   "https://cdn.qwiklabs.com/BkhO4P7tVlJiOZ7MNdKg7o%2BttHOcJHBBHz%2BqeGsR7N4%3D",
+  // AI Infrastructure: Introduction to AI Hypercomputer
+  "https://cdn.qwiklabs.com/nK9hQxanudyuRC1BvmYXupqpxAadYMAJRjjehG%2FKsdc%3D",
 ]);
 
 /**
