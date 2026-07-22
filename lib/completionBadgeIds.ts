@@ -82,6 +82,10 @@ export const COMPLETION_BADGE_IMAGE_URLS = new Set<string>([
   "https://cdn.qwiklabs.com/BkhO4P7tVlJiOZ7MNdKg7o%2BttHOcJHBBHz%2BqeGsR7N4%3D",
   // AI Infrastructure: Introduction to AI Hypercomputer
   "https://cdn.qwiklabs.com/nK9hQxanudyuRC1BvmYXupqpxAadYMAJRjjehG%2FKsdc%3D",
+  // Preparing for Your Professional Cloud Security Engineer Journey
+  "https://cdn.qwiklabs.com/YZ%2F8nCVNUQAbHdDy7ZmIGFbCurn3i8BiUUNhWNIai4A%3D",
+  // Introduction to Cloud Identity
+  "https://cdn.qwiklabs.com/qahOBm2tlWmQsp83hDK1jRlZk8PqltRFx9dM5D2aGiY%3D",
 ]);
 
 /**

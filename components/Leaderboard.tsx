@@ -300,6 +300,12 @@ export function Leaderboard({ highlightId }: { highlightId?: string }) {
   }, []);
 
   const signedOutRef = useRef<{ slug?: string; name?: string } | null>(null);
+  const entriesLengthRef = useRef(0);
+
+  // Sync entries length ke ref agar bisa diakses di load tanpa dependency
+  useEffect(() => {
+    entriesLengthRef.current = entries.length;
+  }, [entries.length]);
 
   const resolveMySlug = useCallback(() => {
     const slug = localStorage.getItem("arcade_my_slug");
@@ -316,7 +322,7 @@ export function Leaderboard({ highlightId }: { highlightId?: string }) {
   const load = useCallback(async (secret?: string, showLoading = false) => {
     if (showLoading) {
       setLoading(true);
-      const currentCount = entries.length;
+      const currentCount = entriesLengthRef.current;
       if (currentCount > 0) {
         setCachedCount(currentCount);
       }
@@ -672,6 +678,8 @@ export function Leaderboard({ highlightId }: { highlightId?: string }) {
             <div className="relative">
               <Search className="w-[11px] h-[11px] absolute left-[10px] top-1/2 -translate-y-1/2 text-white/25" />
               <input type="text" placeholder={t("leaderboardComponent.searchPh")} value={search} onChange={e => setSearch(e.target.value)}
+                id="leaderboard-search"
+                name="leaderboard-search"
                 aria-label={t("leaderboardComponent.searchPh")}
                 className="h-[32px] pl-[28px] pr-3 bg-[#141414] border border-white/[0.08] rounded-[8px] text-[11px] font-[400] text-white focus:outline-none focus:border-[#FCAA26] transition-colors placeholder:text-white/20 w-[140px]" />
             </div>
@@ -798,9 +806,9 @@ export function Leaderboard({ highlightId }: { highlightId?: string }) {
                           </span>
                         )}
                       </div>
-                      <div aria-hidden="true" className="flex items-center gap-[3px] text-[10px] font-[400] text-white/50 min-h-[16px]">
-                        {t("leaderboardComponent.viewProfile")} <ArrowUpRight className="w-[8px] h-[8px]" />
-                      </div>
+                      <Link href={`/profile/${entry.slug || entry.name}`} aria-label={`${t("leaderboardComponent.viewProfile")} ${entry.name}`} className="flex items-center gap-[3px] text-[10px] font-[400] text-white/50 hover:text-[#FCAA26] transition-colors min-h-[24px]">
+                        {t("leaderboardComponent.viewProfile")} <ArrowUpRight className="w-[8px] h-[8px]" aria-hidden="true" />
+                      </Link>
                     </div>
                   </div>
                   <p className="text-[11px] font-[500] text-white/50 text-right">{entry.gameCount}</p>

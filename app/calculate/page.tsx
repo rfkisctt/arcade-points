@@ -256,6 +256,8 @@ function CalculatePageInner() {
               </div>
               <input
                 type="url"
+                id="profile-url"
+                name="profile-url"
                 aria-label={t("calculate.profileUrlLabel")}
                 className="w-full bg-transparent border-0 border-b border-white/[0.1] pb-2.5 text-[14px] font-[400] text-white focus:outline-none focus:border-[#FCAA26] transition-colors duration-200 placeholder:text-white/20"
                 style={{ fontFamily: "'seasonSans', sans-serif" }}

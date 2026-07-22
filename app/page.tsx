@@ -93,6 +93,8 @@ function HeroChatBox() {
       <div className="hero-chat-box">
         <div className="px-5 pt-5 pb-2">
           <textarea
+            id="hero-search"
+            name="hero-search"
             value={value}
             onChange={e => setValue(e.target.value)}
             onKeyDown={handleKey}

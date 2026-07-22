@@ -263,6 +263,8 @@ export default function CoursesPage() {
           <Search className="w-[12px] h-[12px] absolute left-[12px] top-1/2 -translate-y-1/2 text-[rgba(255,255,255,0.25)]" aria-hidden="true" />
           <input
             type="text"
+            id="courses-search"
+            name="courses-search"
             placeholder={t("courses.searchPh")}
             aria-label={t("courses.searchPh")}
             value={search}

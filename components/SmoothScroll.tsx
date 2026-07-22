@@ -6,46 +6,60 @@ import { usePathname } from "next/navigation";
 import { setLenisInstance } from "@/lib/lenis";
 
 export function SmoothScroll() {
-    const lenisRef = useRef<Lenis | null>(null);
-    const pathname = usePathname();
+  const lenisRef = useRef<Lenis | null>(null);
+  const pathname = usePathname();
+  const prevPathnameRef = useRef<string | null>(null);
 
-    useEffect(() => {
+  useEffect(() => {
     const lenis = new Lenis({
-        duration: 1.4,
+      duration: 1.4,
       easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-        lerp: 0.08,
-        wheelMultiplier: 0.9,
-        orientation: "vertical",
-        gestureOrientation: "vertical",
-        smoothWheel: true,
-        infinite: false,
+      lerp: 0.08,
+      wheelMultiplier: 0.9,
+      orientation: "vertical",
+      gestureOrientation: "vertical",
+      smoothWheel: true,
+      infinite: false,
     });
 
     lenisRef.current = lenis;
     setLenisInstance(lenis);
 
     function raf(time: number) {
-        lenis.raf(time);
-        requestAnimationFrame(raf);
+      lenis.raf(time);
+      requestAnimationFrame(raf);
     }
 
     const rafId = requestAnimationFrame(raf);
 
     return () => {
-        cancelAnimationFrame(rafId);
-        lenis.destroy();
-        lenisRef.current = null;
-        setLenisInstance(null);
+      cancelAnimationFrame(rafId);
+      lenis.destroy();
+      lenisRef.current = null;
+      setLenisInstance(null);
     };
   }, []);
 
-    useEffect(() => {
+  // Scroll ke atas hanya saat navigasi forward, bukan saat back dari profile
+  useEffect(() => {
+    const prev = prevPathnameRef.current;
+    prevPathnameRef.current = pathname;
+
+    // Skip first render
+    if (prev === null) return;
+
+    // Jangan scroll ke atas saat back dari profile ke leaderboard
+    // biar posisi pagination tetap terjaga
+    if (prev.startsWith("/profile/") && pathname === "/leaderboard") {
+      return;
+    }
+
     if (lenisRef.current) {
-        lenisRef.current.scrollTo(0, { immediate: true });
+      lenisRef.current.scrollTo(0, { immediate: true });
     } else {
-        window.scrollTo(0, 0);
+      window.scrollTo(0, 0);
     }
   }, [pathname]);
 
-    return null;
+  return null;
 }
