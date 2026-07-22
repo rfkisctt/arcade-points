@@ -155,7 +155,7 @@ function CalculatePageInner() {
           style={{ fontFamily: "'seasonSans', monospace" }}
         >
           skills.google/my_account/profile
-          <ExternalLink className="w-[10px] h-[10px] opacity-60" />
+          <ExternalLink className="w-[10px] h-[10px] opacity-60" aria-hidden="true" />
         </a>
       ),
     },
@@ -172,7 +172,7 @@ function CalculatePageInner() {
       n: 3,
       label: t("calculate.step3Label"),
       body: (
-        <span className="text-[12px] font-[400] text-white/40">
+        <span className="text-[12px] font-[400] text-white/55">
           {t("calculate.step3Body")} <span className="text-white/60 font-[500]">cloudskillsboost.google/public_profiles/…</span>
         </span>
       ),
@@ -181,18 +181,20 @@ function CalculatePageInner() {
       n: 4,
       label: t("calculate.step4Label"),
       body: (
-        <span className="text-[12px] font-[400] text-white/40">
+        <span className="text-[12px] font-[400] text-white/55">
           {t("calculate.step4Body")} <span className="text-white/70 font-[500]">Profile URL</span> {t("calculate.step4Body2")}
         </span>
       ),
     },
   ];
 
+  void mounted;
+
   return (
     <div className="relative z-[1] pt-[72px]">
 
       <div className={`fixed bottom-6 right-6 z-50 flex items-center gap-2 px-4 py-3 bg-[#141414] border border-[#FCAA26]/30 rounded-xl text-[12px] font-[600] text-[#FCAA26] transition-all duration-300 ${savedToast ? "opacity-100 translate-y-0" : "opacity-0 translate-y-2 pointer-events-none"}`}>
-        <Check className="w-[13px] h-[13px]" />
+        <Check className="w-[13px] h-[13px]" aria-hidden="true" />
         <span>{t("calculate.saved")}</span>
       </div>
 
@@ -204,7 +206,7 @@ function CalculatePageInner() {
         >
           {t("calculate.pageTitle")}
         </h1>
-        <p className="text-[13px] font-[400] text-white/40 leading-[21px]">
+        <p className="text-[13px] font-[400] text-white/55 leading-[21px]">
           {t("calculate.pageDesc")}
         </p>
       </div>
@@ -216,7 +218,7 @@ function CalculatePageInner() {
           <div className="bg-[#161616] border border-white/[0.08] rounded-xl overflow-hidden">
 
             <div className="px-5 py-4 border-b border-white/[0.06]">
-              <span className="text-[10px] font-[600] text-white/25 uppercase tracking-[0.16em]">
+              <span className="text-[10px] font-[600] text-white/50 uppercase tracking-[0.16em]">
                 {t("calculate.howToGet")}
               </span>
             </div>
@@ -233,7 +235,7 @@ function CalculatePageInner() {
                       {!isLast && <div className="w-px flex-1 bg-white/[0.06] my-1" />}
                     </div>
                     <div className={`flex-1 min-w-0 ${isLast ? "pb-0" : "pb-4"}`}>
-                      <p className="text-[10px] font-[600] text-white/25 uppercase tracking-wider mb-1.5"
+                      <p className="text-[10px] font-[600] text-white/50 uppercase tracking-wider mb-1.5"
                          style={{ fontFamily: "'seasonSans', sans-serif" }}>
                         {step.label}
                       </p>
@@ -246,14 +248,15 @@ function CalculatePageInner() {
 
             <div className="px-5 py-5">
               <div className="flex items-center gap-2 mb-3">
-                <Link2 className="w-[10px] h-[10px] text-white/25" />
-                <span className="text-[10px] font-[600] text-white/25 uppercase tracking-[0.16em]"
+                <Link2 className="w-[10px] h-[10px] text-white/50" aria-hidden="true" />
+                <span className="text-[10px] font-[600] text-white/50 uppercase tracking-[0.16em]"
                       style={{ fontFamily: "'seasonSans', sans-serif" }}>
                   {t("calculate.profileUrlLabel")}
                 </span>
               </div>
               <input
                 type="url"
+                aria-label={t("calculate.profileUrlLabel")}
                 className="w-full bg-transparent border-0 border-b border-white/[0.1] pb-2.5 text-[14px] font-[400] text-white focus:outline-none focus:border-[#FCAA26] transition-colors duration-200 placeholder:text-white/20"
                 style={{ fontFamily: "'seasonSans', sans-serif" }}
                 placeholder="https://www.cloudskillsboost.google/public_profiles/..."
@@ -271,17 +274,17 @@ function CalculatePageInner() {
             style={{ fontFamily: "'seasonSans', sans-serif" }}
           >
             {loading
-              ? <><Loader2 className="w-3.5 h-3.5 animate-spin" /><span>{t("calculate.analyzing")}</span></>
-              : <><Check className="w-3.5 h-3.5" /><span>{t("calculate.analyze")}</span></>
+              ? <><Loader2 className="w-3.5 h-3.5 animate-spin" aria-hidden="true" /><span>{t("calculate.analyzing")}</span></>
+              : <><Check className="w-3.5 h-3.5" aria-hidden="true" /><span>{t("calculate.analyze")}</span></>
             }
           </button>
 
           {error && (
-            <div className="bg-[#161616] border border-red-500/20 rounded-xl px-4 py-4 flex items-start gap-3">
-              <AlertCircle className="w-3.5 h-3.5 text-red-400 shrink-0 mt-[1px]" />
+            <div className="bg-[#161616] border border-red-500/20 rounded-xl px-4 py-4 flex items-start gap-3" role="alert">
+              <AlertCircle className="w-3.5 h-3.5 text-red-400 shrink-0 mt-[1px]" aria-hidden="true" />
               <div>
                 <p className="text-[12px] font-[600] text-red-400 mb-1">{t("calculate.errorTitle")}</p>
-                <p className="text-[12px] font-[400] text-white/40 leading-relaxed">{error}</p>
+                <p className="text-[12px] font-[400] text-white/55 leading-relaxed">{error}</p>
               </div>
             </div>
           )}
@@ -294,7 +297,7 @@ function CalculatePageInner() {
           <div className="page-container py-10">
             <div className="flex items-center justify-between gap-2 mb-6">
               <span
-                className="text-[10px] font-[600] text-white/25 uppercase tracking-[0.16em]"
+                className="text-[10px] font-[600] text-white/50 uppercase tracking-[0.16em]"
                 style={{ fontFamily: "'seasonSans', sans-serif" }}
               >
                 {t("calculate.resultLabel")}

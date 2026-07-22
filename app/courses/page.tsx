@@ -6,6 +6,7 @@ import { COURSES, ALL_TAGS, ALL_MONTHS, CourseCategory, SkillLevel, Course } fro
 import { useLang } from "@/components/Navbar";
 import { useClientTranslation } from "@/lib/useClientTranslation";
 import i18n from "@/lib/i18n";
+import { lenisScrollTo } from "@/lib/lenis";
 
 const CATEGORIES: (CourseCategory | "All")[] = ["All", "Game", "Skill Badge"];
 const SKILL_LEVELS: SkillLevel[] = ["Beginner", "Intermediate", "Advanced"];
@@ -45,7 +46,7 @@ function FilterDropdown({ label, options, selected, onSelect, onClear, translati
       >
         {label}
         {has && <span className="text-[10px] font-[700] bg-[rgba(0,0,0,0.15)] rounded-full px-[5px] py-[1px]">{selected.length}</span>}
-        <ChevronDown className={`w-[10px] h-[10px] transition-transform duration-200 ${open ? "rotate-180" : ""}`} />
+        <ChevronDown className={`w-[10px] h-[10px] transition-transform duration-200 ${open ? "rotate-180" : ""}`} aria-hidden="true" />
       </button>
       {open && (
         <div className="absolute top-[calc(100%+4px)] left-0 z-50 bg-[#141414] border border-[rgba(255,255,255,0.1)] rounded-[8px] min-w-[160px] py-1">
@@ -101,10 +102,10 @@ function CourseCard({ course, isCompleted }: { course: Course; isCompleted: bool
       <div className="p-3.5 flex flex-col gap-2 flex-1">
         <div className="flex items-start justify-between gap-1">
           <div className="flex items-center gap-1 flex-wrap">
-            <span className="text-[9px] font-[600] text-[rgba(255,255,255,0.3)] uppercase tracking-wider">{t(`categories.${course.category}`)}</span>
-            {course.month && <span className="text-[9px] text-[rgba(255,255,255,0.2)]">· {t(`months.${course.month}`)}</span>}
+            <span className="text-[9px] font-[600] text-[rgba(255,255,255,0.5)] uppercase tracking-wider">{t(`categories.${course.category}`)}</span>
+            {course.month && <span className="text-[9px] text-[rgba(255,255,255,0.5)]">· {t(`months.${course.month}`)}</span>}
             {course.skillLevel && (
-              <span className="text-[8px] font-[600] px-[5px] py-[0.5px] rounded-full border text-white/30 border-white/10">
+              <span className="text-[8px] font-[600] px-[5px] py-[0.5px] rounded-full border text-white/50 border-white/20">
                 {t(`levels.${course.skillLevel}`)}
               </span>
             )}
@@ -112,29 +113,30 @@ function CourseCard({ course, isCompleted }: { course: Course; isCompleted: bool
           {isCompleted ? (
             <span className="text-[8px] font-bold text-[#FCAA26] bg-[#FCAA26]/10 px-1.5 py-0.5 rounded-full shrink-0 whitespace-nowrap">✓ {t("courses.done")}</span>
           ) : (
-            <ExternalLink className="w-[8px] h-[8px] text-white/10 opacity-0 group-hover:opacity-100 transition-opacity shrink-0 mt-0.5" />
+            <ExternalLink className="w-[8px] h-[8px] text-white/10 opacity-0 group-hover:opacity-100 transition-opacity shrink-0 mt-0.5" aria-hidden="true" />
           )}
         </div>
 
-        <h3 className="text-[11px] font-[600] text-white/90 leading-[16px] line-clamp-3 min-h-[48px]">{t(course.titleKey)}</h3>
+        <p className="text-[11px] font-[600] text-white/90 leading-[16px] line-clamp-3 min-h-[48px]">{t(course.titleKey)}</p>
 
         <div className={course.accessCode ? "visible" : "invisible pointer-events-none"}>
-          <p className="text-[8px] font-[600] text-white/20 uppercase tracking-wider mb-1">{t("courses.accessCode")}</p>
+          <p className="text-[8px] font-[600] text-white/50 uppercase tracking-wider mb-1">{t("courses.accessCode")}</p>
           <div className="flex items-center gap-1">
-            <code className="text-[10px] font-[700] text-white/40 tracking-wide break-all">
+            <code className="text-[10px] font-[700] text-white/50 tracking-wide break-all">
               {course.accessCode ?? "placeholder"}
             </code>
             <button
               onClick={handleCopy}
-              className="shrink-0 w-[16px] h-[16px] flex items-center justify-center rounded-[4px] text-white/20 hover:text-white/60 hover:bg-white/[0.06] transition-all duration-150"
+              aria-label={copied ? "Copied" : t("courses.copyCode")}
+              className="shrink-0 w-[24px] h-[24px] min-w-[24px] min-h-[24px] flex items-center justify-center rounded-[4px] text-white/40 hover:text-white/70 hover:bg-white/[0.06] transition-all duration-150"
               title={t("courses.copyCode")}
             >
               {copied ? (
-                <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                   <polyline points="20 6 9 17 4 12" />
                 </svg>
               ) : (
-                <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                   <rect x="9" y="9" width="13" height="13" rx="2" />
                   <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
                 </svg>
@@ -148,13 +150,13 @@ function CourseCard({ course, isCompleted }: { course: Course; isCompleted: bool
             {course.tags.slice(0, 2).map((tag) => (
               <span
                 key={tag}
-                className="text-[8px] font-[500] text-[rgba(255,255,255,0.22)] border border-[rgba(255,255,255,0.07)] px-[5px] py-[1px] rounded-full whitespace-nowrap"
+                className="text-[8px] font-[500] text-[rgba(255,255,255,0.45)] border border-[rgba(255,255,255,0.12)] px-[5px] py-[1px] rounded-full whitespace-nowrap"
               >
                 {t(`courses.tags.${tag}`, tag)}
               </span>
             ))}
           </div>
-          <span className="text-[10px] font-[700] shrink-0 text-white/30">
+          <span className="text-[10px] font-[700] shrink-0 text-white/50">
             {course.category === "Skill Badge" ? "½ pt" : "+1 pt"}
           </span>
         </div>
@@ -193,7 +195,6 @@ export default function CoursesPage() {
   }, [search, activeCategory, selectedTags, selectedMonths, selectedLevels]);
 
   const checkCompleted = (course: Course) => {
-    // Always use EN title for matching — badge titles from Google profiles are always in English
     const enTitle = i18n.getFixedT("en")(course.titleKey).toLowerCase().trim();
     return completedTitles.some((b) => {
       if (b === enTitle) return true;
@@ -236,7 +237,11 @@ export default function CoursesPage() {
 
   const goToPage = (p: number) => {
     setPage(p);
-    setTimeout(() => gridRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 50);
+    setTimeout(() => {
+      if (gridRef.current) {
+        lenisScrollTo(gridRef.current, { offset: -80 });
+      }
+    }, 50);
   };
 
   return (
@@ -249,16 +254,17 @@ export default function CoursesPage() {
         >
           {t("courses.title")}
         </h1>
-        <p className="text-[13px] font-[400] text-white/40">{t("courses.subtitle")}</p>
+        <p className="text-[13px] font-[400] text-white/55">{t("courses.subtitle")}</p>
       </div>
       <div className="divider" />
 
       <div className="page-container py-5">
         <div className="relative max-w-[360px] mb-4">
-          <Search className="w-[12px] h-[12px] absolute left-[12px] top-1/2 -translate-y-1/2 text-[rgba(255,255,255,0.25)]" />
+          <Search className="w-[12px] h-[12px] absolute left-[12px] top-1/2 -translate-y-1/2 text-[rgba(255,255,255,0.25)]" aria-hidden="true" />
           <input
             type="text"
             placeholder={t("courses.searchPh")}
+            aria-label={t("courses.searchPh")}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="w-full pl-[32px] pr-4 h-[34px] bg-[#141414] border border-[rgba(255,255,255,0.08)] rounded-[8px] text-[12px] font-[500] text-white focus:outline-none focus:border-[#FCAA26] transition-colors duration-200 placeholder:text-[rgba(255,255,255,0.2)]"
@@ -266,7 +272,7 @@ export default function CoursesPage() {
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          <div className="flex items-center bg-[#141414] border border-[rgba(255,255,255,0.08)] rounded-[8px] p-[2px] gap-[1px]">
+          <div className="flex items-center bg-[#141414] border border-[rgba(255,255,255,0.08)] rounded-[8px] p-[2px] gap-[1px]" role="group" aria-label="Filter by category">
             {CATEGORIES.map((cat) => {
               const active = activeCategory === cat;
               const label = cat === "All" ? t("courses.catAll") : t(`categories.${cat}`);
@@ -274,11 +280,13 @@ export default function CoursesPage() {
                 <button
                   key={cat}
                   onClick={() => setActiveCategory(cat)}
+                  aria-pressed={active}
                   className={`px-3 py-[5px] rounded-[6px] text-[11px] font-[600] transition-colors duration-150 ${
-                    active ? "bg-white text-[#0A0A0A]" : "text-[rgba(255,255,255,0.4)] hover:text-white"
+                    active ? "bg-white text-[#0A0A0A]" : "text-[rgba(255,255,255,0.5)] hover:text-white"
                   }`}
                 >
-                  <span suppressHydrationWarning>{label}</span> <span className={`text-[9px] ${active ? "text-[#0A0A0A]/50" : "text-[rgba(255,255,255,0.2)]"}`}>{counts[cat]}</span>
+                  <span suppressHydrationWarning>{label}</span>{" "}
+                  <span className={`text-[9px] ${active ? "text-[#0A0A0A]/70" : "text-[rgba(255,255,255,0.5)]"}`}>{counts[cat]}</span>
                 </button>
               );
             })}
@@ -314,15 +322,15 @@ export default function CoursesPage() {
           )}
 
           {hasFilter && (
-            <button onClick={clearAll} className="flex items-center gap-1 text-[11px] font-[600] text-[rgba(255,255,255,0.3)] hover:text-white transition-colors px-2 py-[5px]">
-              <X className="w-[10px] h-[10px]" /> {t("courses.reset")}
+            <button onClick={clearAll} className="flex items-center gap-1 text-[11px] font-[600] text-[rgba(255,255,255,0.5)] hover:text-white transition-colors px-2 py-[5px]">
+              <X className="w-[10px] h-[10px]" aria-hidden="true" /> {t("courses.reset")}
             </button>
           )}
         </div>
 
-        <p className="text-[11px] font-[500] text-[rgba(255,255,255,0.25)] mt-4">
+        <p className="text-[11px] font-[500] text-[rgba(255,255,255,0.50)] mt-4">
           {t("courses.counter", { filtered: filtered.length, total: COURSES.length })}
-          {totalPages > 1 && <span className="ml-2 text-white/15">· {t("courses.page")} {page}/{totalPages}</span>}
+          {totalPages > 1 && <span className="ml-2 text-white/50">· {t("courses.page")} {page}/{totalPages}</span>}
         </p>
       </div>
 
@@ -338,13 +346,14 @@ export default function CoursesPage() {
             </div>
 
             {totalPages > 1 && (
-              <div className="flex items-center justify-center gap-1.5 mt-10">
+              <nav aria-label="Pagination" className="flex items-center justify-center gap-1.5 mt-10">
                 <button
                   onClick={() => goToPage(page - 1)}
                   disabled={page === 1}
-                  className="w-[32px] h-[32px] flex items-center justify-center rounded-[8px] border border-[rgba(255,255,255,0.1)] text-white/40 hover:text-white hover:border-white/25 transition-all disabled:opacity-25 disabled:cursor-not-allowed"
+                  aria-label="Previous page"
+                  className="w-[32px] h-[32px] flex items-center justify-center rounded-[8px] border border-[rgba(255,255,255,0.1)] text-white/50 hover:text-white hover:border-white/25 transition-all disabled:opacity-25 disabled:cursor-not-allowed"
                 >
-                  <ChevronLeft className="w-[14px] h-[14px]" />
+                  <ChevronLeft className="w-[14px] h-[14px]" aria-hidden="true" />
                 </button>
 
                 {Array.from({ length: totalPages }, (_, i) => i + 1).map((p) => {
@@ -353,16 +362,18 @@ export default function CoursesPage() {
                   const showLeftDots = p === 2 && page > 4;
                   const showRightDots = p === totalPages - 1 && page < totalPages - 3;
                   if (!show) {
-                    if (showLeftDots) return <span key={`ld-${p}`} className="text-white/20 text-[12px] w-[8px] text-center">…</span>;
-                    if (showRightDots) return <span key={`rd-${p}`} className="text-white/20 text-[12px] w-[8px] text-center">…</span>;
+                    if (showLeftDots) return <span key={`ld-${p}`} className="text-white/30 text-[12px] w-[8px] text-center" aria-hidden="true">…</span>;
+                    if (showRightDots) return <span key={`rd-${p}`} className="text-white/30 text-[12px] w-[8px] text-center" aria-hidden="true">…</span>;
                     return null;
                   }
                   return (
                     <button
                       key={p}
                       onClick={() => goToPage(p)}
+                      aria-label={`Page ${p}`}
+                      aria-current={isActive ? "page" : undefined}
                       className={`w-[32px] h-[32px] flex items-center justify-center rounded-[8px] text-[12px] font-[600] transition-all ${
-                        isActive ? "bg-white text-[#141414]" : "border border-[rgba(255,255,255,0.1)] text-white/40 hover:text-white hover:border-white/25"
+                        isActive ? "bg-white text-[#141414]" : "border border-[rgba(255,255,255,0.1)] text-white/50 hover:text-white hover:border-white/25"
                       }`}
                     >
                       {p}
@@ -373,16 +384,17 @@ export default function CoursesPage() {
                 <button
                   onClick={() => goToPage(page + 1)}
                   disabled={page === totalPages}
-                  className="w-[32px] h-[32px] flex items-center justify-center rounded-[8px] border border-[rgba(255,255,255,0.1)] text-white/40 hover:text-white hover:border-white/25 transition-all disabled:opacity-25 disabled:cursor-not-allowed"
+                  aria-label="Next page"
+                  className="w-[32px] h-[32px] flex items-center justify-center rounded-[8px] border border-[rgba(255,255,255,0.1)] text-white/50 hover:text-white hover:border-white/25 transition-all disabled:opacity-25 disabled:cursor-not-allowed"
                 >
-                  <ChevronRightIcon className="w-[14px] h-[14px]" />
+                  <ChevronRightIcon className="w-[14px] h-[14px]" aria-hidden="true" />
                 </button>
-              </div>
+              </nav>
             )}
           </>
         ) : (
           <div className="py-[48px] text-center">
-            <p className="text-[13px] font-[500] text-[rgba(255,255,255,0.3)] mb-3">{t("courses.noResult")}</p>
+            <p className="text-[13px] font-[500] text-[rgba(255,255,255,0.5)] mb-3">{t("courses.noResult")}</p>
             <button onClick={clearAll} className="text-[12px] font-[600] text-[#FCAA26] transition-colors">{t("courses.resetFilter")}</button>
           </div>
         )}

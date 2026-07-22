@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { Navbar, LangProvider } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
+import { SmoothScroll } from "@/components/SmoothScroll";
 
 export const metadata: Metadata = {
   title: "Arcade Points | Google Cloud Arcade Facilitator 2026 Points Calculator",
@@ -39,6 +40,11 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://arcade-pts.vercel.app"),
   alternates: {
     canonical: "/",
+    languages: {
+      "id": "https://arcade-pts.vercel.app",
+      "en": "https://arcade-pts.vercel.app",
+      "x-default": "https://arcade-pts.vercel.app",
+    },
   },
 };
 
@@ -52,6 +58,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         </div>
 
         <LangProvider>
+          <SmoothScroll />
           <Navbar />
           <main className="relative z-[1]">{children}</main>
           <Footer />

@@ -10,14 +10,14 @@ export default function TermsPage() {
   return (
     <div className="relative z-[1] pt-[112px] w-full max-w-3xl mx-auto px-4 sm:px-6 pb-12 md:pb-20">
       <div className="mb-8">
-        <Link href="/" className="inline-flex items-center gap-2 text-sm font-semibold text-white/40 hover:text-white transition-colors duration-200 group">
-          <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform duration-200" />
+        <Link href="/" className="inline-flex items-center gap-2 text-sm font-semibold text-white/55 hover:text-white transition-colors duration-200 group">
+          <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform duration-200" aria-hidden="true" />
           <span>{t("terms.back")}</span>
         </Link>
       </div>
 
       <h1 className="text-2xl sm:text-3xl font-bold text-white mb-6">{t("terms.title")}</h1>
-      <p className="text-[12px] text-white/30 mb-8 uppercase tracking-wider font-semibold">{t("terms.lastUpdated")}</p>
+      <p className="text-[12px] text-white/50 mb-8 uppercase tracking-wider font-semibold">{t("terms.lastUpdated")}</p>
 
       <div className="space-y-6 text-sm text-white/60 leading-relaxed font-medium">
         <section>

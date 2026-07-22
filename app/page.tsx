@@ -97,15 +97,17 @@ function HeroChatBox() {
             onChange={e => setValue(e.target.value)}
             onKeyDown={handleKey}
             placeholder={placeholder}
+            aria-label="Search or enter profile URL"
             rows={3}
             className="w-full bg-transparent resize-none text-[16px] font-[400] text-white/90 placeholder:text-white/30 focus:outline-none leading-[26px]"
-            style={{ fontFamily: "'seasonSans', sans-serif" }}
+            style={{ fontFamily: "'seasonSans', sans-serif", height: "78px" }}
           />
         </div>
         <div className="px-4 pb-4 flex items-center justify-end">
           <button
             type="button"
             onClick={handleSubmit}
+            aria-label="Submit"
             className={`w-[34px] h-[34px] rounded-lg flex items-center justify-center transition-all duration-200 ${
               hasValue
                 ? "bg-[#FCAA26] text-[#141414] hover:bg-[#FFBB3D] shadow-[0_0_10px_rgba(255,135,9,0.35)]"
@@ -113,7 +115,7 @@ function HeroChatBox() {
             }`}
             disabled={!hasValue}
           >
-            <ArrowUp className="w-[15px] h-[15px]" />
+            <ArrowUp className="w-[15px] h-[15px]" aria-hidden="true" />
           </button>
         </div>
       </div>
@@ -163,11 +165,10 @@ export default function Home() {
             href="https://www.cloudskillsboost.google"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-[#FCAA26] hover:opacity-80 transition-opacity"
+            className="text-[#FCAA26] hover:opacity-80 transition-opacity underline underline-offset-2"
           >
             Google Cloud Skills Boost
-          </a>{" "}
-          →
+          </a>{" →"}
         </p>
         <HeroChatBox />
       </section>
@@ -188,7 +189,7 @@ export default function Home() {
                 {value}
               </p>
               <p className="text-[13px] font-[600] text-white/90 mb-0.5">{label}</p>
-              <p className="text-[11px] font-[400] text-white/30">{sub}</p>
+              <p className="text-[11px] font-[400] text-white/50">{sub}</p>
             </div>
           ))}
         </div>
@@ -198,7 +199,7 @@ export default function Home() {
 
       <section className="page-container">
         <div className="px-6 pt-12 pb-5">
-          <p className="text-[11px] font-[600] text-white/25 uppercase tracking-[0.16em]"
+          <p className="text-[11px] font-[600] text-white/50 uppercase tracking-[0.16em]"
               style={{ fontFamily: "'seasonSans', sans-serif" }}>
             {t("home.featureLabel")}
           </p>
@@ -211,16 +212,16 @@ export default function Home() {
               className="group flex flex-col sm:flex-row sm:items-center justify-between gap-4 px-6 py-6 hover:bg-white/[0.02] transition-colors duration-150"
             >
               <div className="flex-1 max-w-[600px]">
-                <h3
+                <h2
                   className="text-[15px] text-white mb-1.5 group-hover:text-[#FCAA26] transition-colors duration-200"
                   style={{ fontFamily: "'seasonMix', sans-serif", fontWeight: 600 }}
                 >
                   {title}
-                </h3>
-                <p className="text-[13px] font-[400] text-white/35 leading-[21px]">{desc}</p>
+                </h2>
+                <p className="text-[13px] font-[400] text-white/55 leading-[21px]">{desc}</p>
               </div>
-              <div className="flex items-center gap-1 text-[12px] font-[500] text-white/25 group-hover:text-[#FCAA26] transition-colors duration-200 shrink-0">
-                {cta} <ChevronRight className="w-3 h-3 transition-transform duration-200 group-hover:translate-x-0.5" />
+              <div className="flex items-center gap-1 text-[12px] font-[500] text-white/50 group-hover:text-[#FCAA26] transition-colors duration-200 shrink-0">
+                {cta} <ChevronRight className="w-3 h-3 transition-transform duration-200 group-hover:translate-x-0.5" aria-hidden="true" />
               </div>
             </Link>
             {i < arr.length - 1 && <div className="divider" />}
@@ -231,7 +232,7 @@ export default function Home() {
       <div id="sistem-poin" className="divider" />
 
       <section className="page-container px-6 py-14">
-        <p className="text-[11px] font-[600] text-white/25 uppercase tracking-[0.16em] mb-6"
+        <p className="text-[11px] font-[600] text-white/50 uppercase tracking-[0.16em] mb-6"
             style={{ fontFamily: "'seasonSans', sans-serif" }}>
           {t("home.systemPoin")}
         </p>
@@ -241,7 +242,7 @@ export default function Home() {
         >
           {t("home.programTitle")}
         </h2>
-        <p className="text-[13px] font-[400] text-white/35 mb-10">{t("home.programDate")}</p>
+        <p className="text-[13px] font-[400] text-white/50 mb-10">{t("home.programDate")}</p>
 
         <div className="grid grid-cols-1 sm:grid-cols-3 border border-white/[0.08] rounded-xl overflow-hidden mb-3">
           {badgeTypes.map(({ label, value, note }, i) => (
@@ -256,7 +257,7 @@ export default function Home() {
                 {value}
               </p>
               <p className="text-[11px] font-[600] text-white">{label}</p>
-              <p className="text-[10px] font-[400] text-white/30 mt-0.5">{note}</p>
+              <p className="text-[10px] font-[400] text-white/50 mt-0.5">{note}</p>
             </div>
           ))}
         </div>
@@ -264,7 +265,7 @@ export default function Home() {
         <div className="border border-white/[0.08] rounded-xl overflow-hidden">
           <div className="grid grid-cols-[1fr_64px_90px_64px] px-4 py-2.5 bg-[#161616] border-b border-white/[0.06]">
             {milestoneHeaders.map((h, i) => (
-              <span key={h} className={`text-[9px] font-[600] text-white/25 uppercase tracking-widest ${i > 0 ? "text-right" : ""}`}>{h}</span>
+              <span key={h} className={`text-[9px] font-[600] text-white/50 uppercase tracking-widest ${i > 0 ? "text-right" : ""}`}>{h}</span>
             ))}
           </div>
           {[
@@ -280,8 +281,8 @@ export default function Home() {
               <span className="text-[12px] font-[500] text-white">
                 {t(`milestones.${name}`)}
               </span>
-              <span className="text-[12px] font-[400] text-white/35 text-right">{game}</span>
-              <span className="text-[12px] font-[400] text-white/35 text-right">{skill}</span>
+              <span className="text-[12px] font-[400] text-white/55 text-right">{game}</span>
+              <span className="text-[12px] font-[400] text-white/55 text-right">{skill}</span>
               <span
                 className="text-[12px] text-[#FCAA26] text-right"
                 style={{ fontFamily: "'seasonMix', sans-serif", fontWeight: 600 }}
@@ -313,7 +314,7 @@ export default function Home() {
           >
             {t("home.ctaTitle")}
           </h2>
-          <p className="text-[14px] font-[400] text-white/35 mb-8 max-w-[360px] leading-[22px]">
+          <p className="text-[14px] font-[400] text-white/55 mb-8 max-w-[360px] leading-[22px]">
             {t("home.ctaDesc")}
           </p>
           <Link
@@ -321,7 +322,7 @@ export default function Home() {
             className="inline-flex items-center gap-2 h-[38px] px-6 bg-[#FCAA26] text-[#141414] rounded-lg text-[13px] font-[600] hover:bg-[#FFBB3D] transition-colors duration-200"
             style={{ fontFamily: "'seasonSans', sans-serif" }}
           >
-            {t("home.ctaButton")} <ArrowRight className="w-3.5 h-3.5" />
+            {t("home.ctaButton")} <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
           </Link>
         </div>
       </section>

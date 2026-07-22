@@ -34,7 +34,7 @@ export default function LeaderboardPage() {
           >
             {t("leaderboard.title")}
           </h1>
-          <p className="text-[13px] font-[400] text-white/40 max-w-[400px]">
+          <p className="text-[13px] font-[400] text-white/55 max-w-[400px]">
             {t("leaderboard.desc")}
           </p>
         </div>

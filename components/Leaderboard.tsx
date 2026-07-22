@@ -3,6 +3,7 @@
 import { Crown, RefreshCw, Search, Trash2, ArrowUpRight, Gamepad2, Medal, Download, BarChart2, ChevronDown, EyeOff, Eye } from "lucide-react";
 import { useEffect, useState, useCallback, useRef } from "react";
 import { createPortal } from "react-dom";
+import { lenisScrollTo } from "@/lib/lenis";
 import Link from "next/link";
 import { useLang } from "./Navbar";
 import { useClientTranslation } from "@/lib/useClientTranslation";
@@ -77,7 +78,7 @@ function RankCell({ rank }: { rank: number }) {
   );
   return (
     <div className="w-[26px] h-[26px] flex items-center justify-center">
-      <span className={`text-[12px] font-[700] ${rank <= 3 ? "text-white/60" : "text-white/25"}`}>
+      <span className={`text-[12px] font-[700] ${rank <= 3 ? "text-white/60" : "text-white/50"}`}>
         {rank}
       </span>
     </div>
@@ -169,7 +170,7 @@ function SortDropdown({ value, onChange }: {
       <button
         type="button"
         onClick={() => setOpen(o => !o)}
-        className="flex items-center gap-[6px] h-[32px] px-3 rounded-[8px] text-[12px] font-[600] border transition-all duration-200 bg-[#141414] border-white/[0.08] text-white/40 hover:text-white hover:border-white/[0.2]"
+        className="flex items-center gap-[6px] h-[32px] px-3 rounded-[8px] text-[12px] font-[600] border transition-all duration-200 bg-[#141414] border-white/[0.08] text-white/50 hover:text-white hover:border-white/[0.2]"
       >
         {t("leaderboardComponent.sortPrefix")} {t(`leaderboardComponent.sort${value.charAt(0).toUpperCase() + value.slice(1)}`)}
         <ChevronDown className={`w-[10px] h-[10px] transition-transform duration-200 ${open ? "rotate-180" : ""}`} />
@@ -221,7 +222,7 @@ function MilestoneDropdown({ options, value, onChange }: {
       <button
         type="button"
         onClick={() => setOpen(o => !o)}
-        className={`flex items-center gap-[6px] h-[32px] px-3 rounded-[8px] text-[12px] font-[600] border transition-all duration-200 ${isActive ? "bg-[#FCAA26] border-[rgba(252,170,38,0.2)] text-[#0A0A0A]" : "bg-[#141414] border-white/[0.08] text-white/40 hover:text-white hover:border-white/[0.2]"}`}
+        className={`flex items-center gap-[6px] h-[32px] px-3 rounded-[8px] text-[12px] font-[600] border transition-all duration-200 ${isActive ? "bg-[#FCAA26] border-[rgba(252,170,38,0.2)] text-[#0A0A0A]" : "bg-[#141414] border-white/[0.08] text-white/50 hover:text-white hover:border-white/[0.2]"}`}
       >
         {value ? t(`milestones.${value}`) : "Milestone"}
         <ChevronDown className={`w-[10px] h-[10px] transition-transform duration-200 ${open ? "rotate-180" : ""}`} />
@@ -258,7 +259,10 @@ export function Leaderboard({ highlightId }: { highlightId?: string }) {
   const [filterMilestone, setFilterMilestone] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [initialLoad, setInitialLoad] = useState(true);
-  const [cachedCount, setCachedCount] = useState(0);  const [mounted, setMounted] = useState(false);
+  const [cachedCount, setCachedCount] = useState(0);
+  const [skeletonCount, setSkeletonCount] = useState(0);
+  const [cachedTotalPages, setCachedTotalPages] = useState(0);
+  const [mounted, setMounted] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
   const [mySlug, setMySlug] = useState<string | undefined>(undefined);
   const [myPrevRank, setMyPrevRank] = useState<number | null>(null);
@@ -273,8 +277,27 @@ export function Leaderboard({ highlightId }: { highlightId?: string }) {
   const [toggleHiddenLoading, setToggleHiddenLoading] = useState<string | null>(null);
   const [resyncLoading, setResyncLoading] = useState(false);
   const [resyncResult, setResyncResult] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(() => {
+    if (typeof window !== "undefined") {
+      const saved = sessionStorage.getItem("arcade_leaderboard_page");
+      return saved ? parseInt(saved) : 1;
+    }
+    return 1;
+  });
   const { lang } = useLang();
   const { t } = useClientTranslation();
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  const ITEMS_PER_PAGE = 10;
+
+  const changePage = useCallback((page: number) => {
+    setCurrentPage(page);
+    setTimeout(() => {
+      if (containerRef.current) {
+        lenisScrollTo(containerRef.current, { offset: -80 });
+      }
+    }, 50);
+  }, []);
 
   const signedOutRef = useRef<{ slug?: string; name?: string } | null>(null);
 
@@ -290,8 +313,26 @@ export function Leaderboard({ highlightId }: { highlightId?: string }) {
     } catch {}
   }, []);
 
-  const load = useCallback(async (secret?: string) => {
+  const load = useCallback(async (secret?: string, showLoading = false) => {
+    if (showLoading) {
+      setLoading(true);
+      const currentCount = entries.length;
+      if (currentCount > 0) {
+        setCachedCount(currentCount);
+      }
+      setEntries([]);
+    }
+    const startTime = Date.now();
     const data = await fetchLeaderboard(secret ?? adminSecret);
+    
+    if (showLoading) {
+      const elapsed = Date.now() - startTime;
+      const remaining = Math.max(0, 600 - elapsed);
+      if (remaining > 0) {
+        await new Promise(resolve => setTimeout(resolve, remaining));
+      }
+    }
+    
     const so = signedOutRef.current;
     const filtered = so
       ? data.filter(e => {
@@ -430,6 +471,33 @@ export function Leaderboard({ highlightId }: { highlightId?: string }) {
     });
 
   const milestoneOptions = Array.from(new Set(entries.map(e => e.milestoneName))).sort();
+
+  const totalPages = Math.ceil(filtered.length / ITEMS_PER_PAGE);
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const endIndex = startIndex + ITEMS_PER_PAGE;
+  const paginatedEntries = filtered.slice(startIndex, endIndex);
+
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, sortBy, filterMilestone]);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      sessionStorage.setItem("arcade_leaderboard_page", currentPage.toString());
+    }
+  }, [currentPage]);
+
+  useEffect(() => {
+    if (paginatedEntries.length > 0) {
+      setSkeletonCount(paginatedEntries.length);
+    }
+  }, [paginatedEntries.length]);
+
+  useEffect(() => {
+    if (totalPages > 0) {
+      setCachedTotalPages(totalPages);
+    }
+  }, [totalPages]);
 
   const handleExportCsv = () => {
     const headers = ["#", "Participant", "Game", "Skill", "Points", "Milestone"];
@@ -571,7 +639,7 @@ export function Leaderboard({ highlightId }: { highlightId?: string }) {
         document.body
       )}
 
-      <div className="bg-[#161616] border border-white/[0.08] rounded-[10px] overflow-hidden">
+      <div ref={containerRef} className="bg-[#161616] border border-white/[0.08] rounded-[10px] overflow-hidden">
         {isAdmin && showAdminStats && (
           <div className="px-5 py-3 bg-[#161616] border-b border-white/[0.06] flex flex-wrap gap-4 items-center">
             <span className="text-[11px] font-[600] text-white/50">{t("leaderboardComponent.adminStatsLabel", { total: entries.length, avg: avgPoints })}</span>
@@ -589,13 +657,13 @@ export function Leaderboard({ highlightId }: { highlightId?: string }) {
           <div className="flex items-center gap-3">
             <img src="/logo.png" alt="Arcade Points" className="w-[18px] h-[18px] object-contain" />
             <span className="text-[13px] font-[700] text-white">{t("leaderboardComponent.ranking")}</span>
-            <span className="text-[10px] font-[600] text-white/30 bg-[#141414] border border-white/[0.07] px-[10px] py-[3px] rounded-full">
+            <span className="text-[10px] font-[600] text-white/50 bg-[#141414] border border-white/[0.07] px-[10px] py-[3px] rounded-full">
               {t("leaderboardComponent.participants", { count: entries.length })}
             </span>
           </div>
           <div className="flex items-center gap-2 flex-wrap justify-end">
             {lastUpdated && (
-              <span className="text-[10px] font-[400] text-white/20 hidden sm:block" style={{ fontFamily: "'seasonSans', sans-serif" }}>
+              <span aria-hidden="true" className="text-[10px] font-[400] text-white/45 hidden sm:block" style={{ fontFamily: "'seasonSans', sans-serif" }}>
                 {t("leaderboardComponent.updated")} {lastUpdated.toLocaleTimeString(lang === "id" ? "id-ID" : "en-US", { hour: "2-digit", minute: "2-digit", second: "2-digit" })}
               </span>
             )}
@@ -604,11 +672,13 @@ export function Leaderboard({ highlightId }: { highlightId?: string }) {
             <div className="relative">
               <Search className="w-[11px] h-[11px] absolute left-[10px] top-1/2 -translate-y-1/2 text-white/25" />
               <input type="text" placeholder={t("leaderboardComponent.searchPh")} value={search} onChange={e => setSearch(e.target.value)}
+                aria-label={t("leaderboardComponent.searchPh")}
                 className="h-[32px] pl-[28px] pr-3 bg-[#141414] border border-white/[0.08] rounded-[8px] text-[11px] font-[400] text-white focus:outline-none focus:border-[#FCAA26] transition-colors placeholder:text-white/20 w-[140px]" />
             </div>
             <button
-              onClick={() => load()}
-              className="w-[32px] h-[32px] flex items-center justify-center rounded-[8px] bg-[#141414] border border-white/[0.08] text-white/30 hover:text-white hover:border-white/[0.2] transition-all"
+              onClick={() => load(undefined, true)}
+              disabled={loading}
+              className={`w-[32px] h-[32px] flex items-center justify-center rounded-[8px] bg-[#141414] border border-white/[0.08] text-white/30 hover:text-white hover:border-white/[0.2] transition-all ${loading ? "cursor-wait" : ""}`}
               title="Refresh"
             >
               <RefreshCw className={`w-[11px] h-[11px] ${loading ? "animate-spin" : ""}`} />
@@ -650,26 +720,26 @@ export function Leaderboard({ highlightId }: { highlightId?: string }) {
           </div>
         </div>
 
-        {(filtered.length > 0 || (initialLoad && cachedCount > 0)) && (
+        {(filtered.length > 0 || (initialLoad && cachedCount > 0) || (loading && entries.length === 0)) && (
           <div
             className={`px-5 py-3 grid border-b border-white/[0.04]`}
             style={{ gridTemplateColumns: isAdmin ? "32px 1fr 40px 40px 56px 96px 28px" : "32px 1fr 40px 40px 56px 96px", columnGap: "12px" }}
           >
-            <span className="text-[10px] font-[600] text-white/25 uppercase tracking-wider">#</span>
-            <span className="text-[10px] font-[600] text-white/25 uppercase tracking-wider">{t("leaderboardComponent.colParticipant")}</span>
-            <div className="flex justify-end" title="Game"><Gamepad2 className="w-[11px] h-[11px] text-white/25" /></div>
-            <div className="flex justify-end" title="Skill Badge (count)"><Medal className="w-[11px] h-[11px] text-white/25" /></div>
-            <span className="text-[10px] font-[600] text-white/25 uppercase tracking-wider text-center">{t("leaderboardComponent.colPoints")}</span>
-            <span className="text-[10px] font-[600] text-white/25 uppercase tracking-wider text-center">{t("leaderboardComponent.colMilestone")}</span>
+            <span className="text-[10px] font-[600] text-white/50 uppercase tracking-wider">#</span>
+            <span className="text-[10px] font-[600] text-white/50 uppercase tracking-wider">{t("leaderboardComponent.colParticipant")}</span>
+            <div className="flex justify-end" role="img" aria-label="Game"><Gamepad2 className="w-[11px] h-[11px] text-white/50" aria-hidden="true" /></div>
+            <div className="flex justify-end" role="img" aria-label="Skill Badge"><Medal className="w-[11px] h-[11px] text-white/50" aria-hidden="true" /></div>
+            <span className="text-[10px] font-[600] text-white/50 uppercase tracking-wider text-center">{t("leaderboardComponent.colPoints")}</span>
+            <span className="text-[10px] font-[600] text-white/50 uppercase tracking-wider text-center">{t("leaderboardComponent.colMilestone")}</span>
             {isAdmin && <span />}
           </div>
         )}
 
-        {initialLoad ? (
-          cachedCount > 0 ? (
+        {initialLoad || (loading && entries.length === 0) ? (
+          cachedCount > 0 || loading ? (
             <div className="w-full flex flex-col gap-0">
-              {[...Array(cachedCount)].map((_, i) => (
-                <div key={i} className="px-5 py-4 grid items-center border-b border-white/[0.03] last:border-0" style={{ gridTemplateColumns: "32px 1fr 40px 40px 56px 96px", columnGap: "12px" }}>
+              {[...Array(skeletonCount > 0 ? skeletonCount : (loading && entries.length === 0 ? ITEMS_PER_PAGE : cachedCount))].map((_, i) => (
+                <div key={i} className="px-5 py-4 grid items-center border-b border-white/[0.03] last:border-0" style={{ gridTemplateColumns: isAdmin ? "32px 1fr 40px 40px 56px 96px 28px" : "32px 1fr 40px 40px 56px 96px", columnGap: "12px" }}>
                   <div className="w-[26px] h-[26px] rounded-full bg-white/[0.04] animate-pulse" />
                   <div className="flex items-center gap-3">
                     <div className="w-[30px] h-[30px] rounded-full bg-white/[0.04] animate-pulse shrink-0" />
@@ -682,6 +752,7 @@ export function Leaderboard({ highlightId }: { highlightId?: string }) {
                   <div className="h-[10px] rounded-full bg-white/[0.04] animate-pulse ml-auto w-[20px]" />
                   <div className="h-[22px] rounded-full bg-white/[0.04] animate-pulse mx-auto w-[40px]" />
                   <div className="h-[22px] rounded-full bg-white/[0.03] animate-pulse mx-auto w-[80px]" />
+                  {isAdmin && <div />}
                 </div>
               ))}
             </div>
@@ -692,11 +763,11 @@ export function Leaderboard({ highlightId }: { highlightId?: string }) {
           )
         ) : filtered.length === 0 ? (
           <div className="py-[48px] text-center">
-            <p className="text-[12px] font-[400] text-white/25">{entries.length === 0 ? t("leaderboardComponent.empty") : t("leaderboardComponent.noMatch", { name: search })}</p>
+            <p className="text-[12px] font-[400] text-white/50">{entries.length === 0 ? t("leaderboardComponent.empty") : t("leaderboardComponent.noMatch", { name: search })}</p>
           </div>
         ) : (
           <>
-            {filtered.slice(0, 10).map(entry => {
+            {paginatedEntries.map(entry => {
               const rank = entries.findIndex(e => e.slug === entry.slug) + 1;
               const isMe = !!mySlug && (
                 mySlug.startsWith("__name__")
@@ -720,22 +791,22 @@ export function Leaderboard({ highlightId }: { highlightId?: string }) {
                     />
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2">
-                        <Link href={`/profile/${entry.slug || entry.name}`} className="text-[12px] font-[600] text-white hover:text-[#FCAA26] transition-colors duration-200 truncate block">{entry.name}</Link>
+                        <Link href={`/profile/${entry.slug || entry.name}`} className="text-[12px] font-[600] text-white hover:text-[#FCAA26] transition-colors duration-200 truncate block min-h-[24px] leading-[24px]" aria-label={entry.name}>{entry.name}</Link>
                         {isAdmin && entry.hidden && (
                           <span title="Hidden from leaderboard" className="shrink-0 flex items-center">
                             <EyeOff className="w-[12px] h-[12px] text-white/40" />
                           </span>
                         )}
                       </div>
-                      <Link href={`/profile/${entry.slug || entry.name}`} className="flex items-center gap-[3px] text-[10px] font-[400] text-white/25 hover:text-[#FCAA26] transition-colors">
+                      <div aria-hidden="true" className="flex items-center gap-[3px] text-[10px] font-[400] text-white/50 min-h-[16px]">
                         {t("leaderboardComponent.viewProfile")} <ArrowUpRight className="w-[8px] h-[8px]" />
-                      </Link>
+                      </div>
                     </div>
                   </div>
-                  <p className="text-[11px] font-[500] text-white/40 text-right">{entry.gameCount}</p>
-                  <p className="text-[11px] font-[500] text-white/40 text-right">{entry.skillCount}</p>
+                  <p className="text-[11px] font-[500] text-white/50 text-right">{entry.gameCount}</p>
+                  <p className="text-[11px] font-[500] text-white/50 text-right">{entry.skillCount}</p>
                   <p className="text-[13px] font-[700] text-[#FCAA26] text-center">{entry.totalPoints}</p>
-                  <p className="text-[10px] font-[500] text-white/35 bg-[#141414] border border-white/[0.06] px-[8px] py-[3px] rounded-full whitespace-nowrap overflow-hidden text-ellipsis text-center mx-auto">
+                  <p className="text-[10px] font-[500] text-white/50 bg-[#141414] border border-white/[0.06] px-[8px] py-[3px] rounded-full whitespace-nowrap overflow-hidden text-ellipsis text-center mx-auto">
                     {t(`milestones.${entry.milestoneName}`)}
                   </p>
                   {isAdmin && (
@@ -748,18 +819,79 @@ export function Leaderboard({ highlightId }: { highlightId?: string }) {
                 </div>
               );
             })}
-            {filtered.length > 10 && (
-              <div className="px-5 py-4 text-center">
-                <p className="text-[11px] font-[400] text-white/25">
-                  {t("leaderboardComponent.moreParticipants", { count: filtered.length - 10 })}
-                </p>
-              </div>
-            )}
           </>
         )}
 
+        {((totalPages > 1) || (loading && cachedTotalPages > 1)) && (
+          <div className="px-5 py-6 flex flex-col items-center gap-4 border-t border-white/[0.04]">
+            <p className="text-[11px] font-[400] text-white/50">
+              {loading && entries.length === 0 ? (
+                <span className="opacity-50">Loading...</span>
+              ) : (
+                <>Showing {startIndex + 1}-{Math.min(endIndex, filtered.length)} of {filtered.length} participants</>
+              )}
+            </p>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => changePage(Math.max(1, currentPage - 1))}
+                disabled={currentPage === 1 || loading}
+                className="w-[32px] h-[32px] flex items-center justify-center rounded-[10px] bg-[#141414] border border-white/[0.08] text-white/40 hover:text-white hover:border-white/[0.2] disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                title="Previous page"
+              >
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="15 18 9 12 15 6"></polyline>
+                </svg>
+              </button>
+              
+              <div className="flex items-center gap-1">
+                {Array.from({ length: Math.min(loading ? cachedTotalPages : totalPages, 5) }, (_, i) => {
+                  const activeTotalPages = loading ? cachedTotalPages : totalPages;
+                  let pageNum: number;
+                  if (activeTotalPages <= 5) {
+                    pageNum = i + 1;
+                  } else if (currentPage <= 3) {
+                    pageNum = i + 1;
+                  } else if (currentPage >= activeTotalPages - 2) {
+                    pageNum = activeTotalPages - 4 + i;
+                  } else {
+                    pageNum = currentPage - 2 + i;
+                  }
+                  
+                  return (
+                    <button
+                      key={pageNum}
+                      onClick={() => !loading && changePage(pageNum)}
+                      disabled={loading}
+                      aria-label={`Page ${pageNum}`}
+                      aria-current={currentPage === pageNum ? "page" : undefined}
+                      className={`min-w-[32px] h-[32px] px-2 flex items-center justify-center rounded-[10px] text-[12px] font-[600] transition-all ${
+                        currentPage === pageNum
+                          ? "bg-white text-[#0A0A0A]"
+                          : "bg-[#141414] border border-white/[0.08] text-white/40 hover:text-white hover:border-white/[0.2]"
+                      } ${loading ? "opacity-50 cursor-not-allowed" : ""}`}
+                    >
+                      {pageNum}
+                    </button>
+                  );
+                })}
+              </div>
+
+              <button
+                onClick={() => changePage(Math.min(loading ? cachedTotalPages : totalPages, currentPage + 1))}
+                disabled={currentPage === (loading ? cachedTotalPages : totalPages) || loading}
+                className="w-[32px] h-[32px] flex items-center justify-center rounded-[10px] bg-[#141414] border border-white/[0.08] text-white/40 hover:text-white hover:border-white/[0.2] disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                title="Next page"
+              >
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="9 18 15 12 9 6"></polyline>
+                </svg>
+              </button>
+            </div>
+          </div>
+        )}
+
         <div className="px-5 py-3 border-t border-white/[0.04] text-center">
-          <p className="text-[10px] font-[400] text-white/20">{t("leaderboardComponent.footer")}</p>
+          <p className="text-[10px] font-[400] text-white/45">{t("leaderboardComponent.footer")}</p>
         </div>
       </div>
     </>
