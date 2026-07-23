@@ -105,7 +105,8 @@ export function parseProfileHtmlServer(html: string): Profile {
     if (title || imageUrl) {
       const baseCategory = categorizeBadge(title || 'Uncategorized');
       // Override ke Completion Badge berdasarkan image URL (lebih akurat dari title)
-      const category: BadgeCategory = (baseCategory === 'Skill Badge' && isCompletionBadge(imageUrl))
+      // Image URL dicek duluan — title seperti "...Arcade Game" bisa false-positive ke Game
+      const category: BadgeCategory = isCompletionBadge(imageUrl)
         ? 'Completion Badge'
         : baseCategory;
       badges.push({
