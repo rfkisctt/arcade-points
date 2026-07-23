@@ -5,7 +5,7 @@ import { useEffect, useState, useCallback } from "react";
 import { createPortal } from "react-dom";
 import Link from "next/link";
 import { ArrowLeft, Loader2, AlertCircle, RefreshCw, QrCode, Link2, Check } from "lucide-react";
-import { parseProfileHtml, calculateStats } from "@/lib/utils";
+import { calculateStats } from "@/lib/utils";
 import { Profile, Stats } from "@/lib/types";
 import { ProfileCard } from "@/components/ProfileCard";
 import { BadgeInventory } from "@/components/BadgeInventory";
@@ -200,6 +200,19 @@ export default function ProfilePage() {
     setErrorMsg("");
 
     try {
+      // Selalu trigger resync ke DB dari Google (fire-and-forget saat first load, await saat refresh)
+      const refreshPromise = fetch(`/api/leaderboard/refresh`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ slug }),
+      }).catch(() => {});
+
+      if (isRefresh) {
+        // Saat klik Refresh, tunggu resync selesai dulu baru ambil data
+        await refreshPromise;
+      }
+      // Saat first load, resync jalan di background — tidak perlu ditunggu
+
       const res = await fetch(`/api/leaderboard/by-slug/${slug}`);
       if (!res.ok) {
         setStatus("error");
@@ -230,10 +243,14 @@ export default function ProfilePage() {
         return;
       }
 
-      const { html } = await profileRes.json();
-      const parsed = parseProfileHtml(html);
+      const { profile: fetchedProfile } = await profileRes.json();
+      if (!fetchedProfile) {
+        setStatus("no-profile");
+        return;
+      }
+      const parsed: Profile = fetchedProfile;
       setProfile(parsed);
-      setStats(calculateStats(parsed, false));
+      setStats(calculateStats(parsed, true));
       setStatus("done");
     } catch (err) {
       setStatus("error");

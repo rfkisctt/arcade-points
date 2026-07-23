@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
 
   const key = `${slug}:${ip}`;
   const now = Date.now();
-  if (now - (refreshMap.get(key) ?? 0) < 10 * 60 * 1000) {
+  if (now - (refreshMap.get(key) ?? 0) < 2 * 60 * 1000) {
     return NextResponse.json({ error: 'Rate limited.', cached: true }, { status: 429 });
   }
   refreshMap.set(key, now);

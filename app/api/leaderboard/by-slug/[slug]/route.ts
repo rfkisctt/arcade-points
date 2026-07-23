@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { timingSafeEqual } from 'crypto';
 import { supabase } from '@/lib/supabase';
+import { fetchAndVerifyProfile } from '@/lib/serverUtils';
 
 function isTimingSafeEqual(a: string | null, b: string | null): boolean {
   if (!a || !b) return false;
@@ -15,6 +16,28 @@ function checkRate(ip: string): boolean {
   if (!e || now > e.resetAt) { rateMap.set(ip, { count: 1, resetAt: now + 60_000 }); return true; }
   if (e.count >= 30) return false;
   e.count++; return true;
+}
+
+const STALE_MS = 30 * 60 * 1000; // 30 menit
+
+async function backgroundResync(id: string, profileUrl: string) {
+  try {
+    const { profile, stats } = await fetchAndVerifyProfile(profileUrl, true);
+    await supabase.from('leaderboard').update({
+      name:            profile.name.trim().slice(0, 100),
+      avatar_url:      profile.avatarUrl || '',
+      total_points:    stats.totalPoints,
+      base_points:     stats.basePoints,
+      milestone_name:  stats.currentMilestone.name.slice(0, 50),
+      milestone_bonus: stats.currentMilestone.bonus,
+      game_count:      stats.counts.Game,
+      skill_count:     stats.counts['Skill Badge'],
+      trivia_count:    stats.counts.Trivia,
+      saved_at:        Date.now(),
+    }).eq('id', id);
+  } catch {
+    // silent — background task, tidak perlu throw
+  }
 }
 
 export async function GET(
@@ -34,7 +57,7 @@ export async function GET(
   try {
     const { data, error } = await supabase
       .from('leaderboard')
-      .select('slug,name,avatar_url,total_points,base_points,milestone_name,milestone_bonus,game_count,skill_count,trivia_count,saved_at,profile_url')
+      .select('slug,name,avatar_url,total_points,base_points,milestone_name,milestone_bonus,game_count,skill_count,trivia_count,saved_at,profile_url,id')
       .eq('slug', slug)
       .eq('hidden', false)
       .maybeSingle();
@@ -43,7 +66,19 @@ export async function GET(
       return NextResponse.json({ error: 'Not found.' }, { status: 404 });
     }
 
-    const { profile_url, avatar_url, total_points, base_points, milestone_name, milestone_bonus, game_count, skill_count, trivia_count, saved_at, ...rest } = data;
+    // Kalau data sudah stale, resync di background tanpa nunggu
+    // Gunakan waitUntil jika tersedia (Vercel Edge/Node runtime) agar tidak di-kill sebelum selesai
+    const isStale = !data.saved_at || (Date.now() - data.saved_at) > STALE_MS;
+    if (isStale && data.profile_url && data.id) {
+      const resyncPromise = backgroundResync(data.id, data.profile_url);
+      // @ts-ignore — waitUntil tersedia di Vercel Runtime
+      if (typeof globalThis !== "undefined" && (globalThis as unknown as { waitUntil?: (p: Promise<unknown>) => void }).waitUntil) {
+        // @ts-ignore
+        (globalThis as unknown as { waitUntil: (p: Promise<unknown>) => void }).waitUntil(resyncPromise);
+      }
+    }
+
+    const { profile_url, id, avatar_url, total_points, base_points, milestone_name, milestone_bonus, game_count, skill_count, trivia_count, saved_at, ...rest } = data;
     return NextResponse.json(
       {
         ...rest,

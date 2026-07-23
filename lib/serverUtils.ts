@@ -103,9 +103,8 @@ export function parseProfileHtmlServer(html: string): Profile {
     const badgeUrl = linkEl.length > 0 ? linkEl.attr('href') : undefined;
 
     if (title || imageUrl) {
-      const baseCategory = title.toLowerCase().includes('ai boost bites') || title.toLowerCase().includes('ai boost bootcamp')
-        ? 'Completion Badge'
-        : categorizeBadge(title || 'Uncategorized');
+      const baseCategory = categorizeBadge(title || 'Uncategorized');
+      // Override ke Completion Badge berdasarkan image URL (lebih akurat dari title)
       const category: BadgeCategory = (baseCategory === 'Skill Badge' && isCompletionBadge(imageUrl))
         ? 'Completion Badge'
         : baseCategory;
@@ -171,12 +170,6 @@ export async function fetchAndVerifyProfile(profileUrl: string, hasExtraBonus: b
 
   const profile = parseProfileHtmlServer(html);
   profile.name = profile.name.replace(/<[^>]*>/g, '').trim().slice(0, 100);
-
-  for (const badge of profile.badges) {
-    if (badge.category === 'Skill Badge' && isCompletionBadge(badge.imageUrl)) {
-      badge.category = 'Completion Badge';
-    }
-  }
 
   const stats = calculateStats(profile, hasExtraBonus);
 

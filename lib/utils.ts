@@ -5,7 +5,7 @@ export function categorizeBadge(title: string): BadgeCategory {
   const t = title.toLowerCase();
   if (t.includes("trivia")) return "Trivia";
   if (t.includes("level") || t.includes("arcade") || t.includes("game") || t.includes("baseline") || t.includes("challenge") || t.includes("safe spaces")) return "Game";
-  if (t.includes("course") || t.includes("path") || t.includes("learning") || t.includes("completion badge") || t.includes("ai boost bites")) return "Completion Badge";
+  if (t.includes("course") || t.includes("path") || t.includes("completion badge") || t.includes("ai boost bites")) return "Completion Badge";
   return "Skill Badge";
 }
 
@@ -103,12 +103,12 @@ export function calculateStats(profile: Profile, hasExtraBonus: boolean): Stats 
     counts[b.category] = (counts[b.category] || 0) + 1;
   });
 
+  // Completion Badge TIDAK dihitung sebagai Skill Badge
   const pointsFromGames = counts.Game * POINT_RULES.game;
   const pointsFromTrivia = counts.Trivia * POINT_RULES.trivia;
   const pointsFromSkills = Math.floor(counts["Skill Badge"] / POINT_RULES.skillBadgePerPoint);
-  const pointsFromCourses = counts["Completion Badge"] * POINT_RULES.course;
 
-  const basePoints = pointsFromGames + pointsFromTrivia + pointsFromSkills + pointsFromCourses;
+  const basePoints = pointsFromGames + pointsFromTrivia + pointsFromSkills;
 
   let currentMilestone = MILESTONES[0];
   let nextMilestone = MILESTONES[1] || null;
