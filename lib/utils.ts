@@ -46,7 +46,6 @@ export function parseProfileHtml(html: string): Profile {
   let avatarUrl = "";
   if (avatarElement) {
     const src = (avatarElement as HTMLImageElement).getAttribute("src") || (avatarElement as HTMLImageElement).src || "";
-    // Make absolute if relative
     if (src.startsWith("http")) {
       avatarUrl = src;
     } else if (src.startsWith("//")) {
@@ -103,7 +102,6 @@ export function calculateStats(profile: Profile, hasExtraBonus: boolean): Stats 
     counts[b.category] = (counts[b.category] || 0) + 1;
   });
 
-  // Completion Badge TIDAK dihitung sebagai Skill Badge
   const pointsFromGames = counts.Game * POINT_RULES.game;
   const pointsFromTrivia = counts.Trivia * POINT_RULES.trivia;
   const pointsFromSkills = Math.floor(counts["Skill Badge"] / POINT_RULES.skillBadgePerPoint);

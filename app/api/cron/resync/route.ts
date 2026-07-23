@@ -2,14 +2,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import { supabase } from '@/lib/supabase';
 import { fetchAndVerifyProfile } from '@/lib/serverUtils';
 
-export const maxDuration = 300; // 5 menit, cukup untuk banyak profil
+export const maxDuration = 300;
 
 export async function GET(request: NextRequest) {
-  // Vercel Cron mengirim Authorization: Bearer <CRON_SECRET>
   const authHeader = request.headers.get('authorization');
   const cronSecret = process.env.CRON_SECRET;
 
-  // Di production wajib ada CRON_SECRET, di localhost boleh skip
   if (cronSecret && authHeader !== `Bearer ${cronSecret}`) {
     return NextResponse.json({ error: 'Unauthorized.' }, { status: 401 });
   }
@@ -55,7 +53,6 @@ export async function GET(request: NextRequest) {
       failed++;
     }
 
-    // Jeda antar request supaya tidak rate-limited Google
     await new Promise(r => setTimeout(r, 800));
   }
 

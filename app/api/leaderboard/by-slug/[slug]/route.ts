@@ -36,7 +36,6 @@ async function backgroundResync(id: string, profileUrl: string) {
       saved_at:        Date.now(),
     }).eq('id', id);
   } catch {
-    // silent — background task, tidak perlu throw
   }
 }
 
@@ -66,14 +65,10 @@ export async function GET(
       return NextResponse.json({ error: 'Not found.' }, { status: 404 });
     }
 
-    // Kalau data sudah stale, resync di background tanpa nunggu
-    // Gunakan waitUntil jika tersedia (Vercel Edge/Node runtime) agar tidak di-kill sebelum selesai
     const isStale = !data.saved_at || (Date.now() - data.saved_at) > STALE_MS;
     if (isStale && data.profile_url && data.id) {
       const resyncPromise = backgroundResync(data.id, data.profile_url);
-      // @ts-ignore — waitUntil tersedia di Vercel Runtime
       if (typeof globalThis !== "undefined" && (globalThis as unknown as { waitUntil?: (p: Promise<unknown>) => void }).waitUntil) {
-        // @ts-ignore
         (globalThis as unknown as { waitUntil: (p: Promise<unknown>) => void }).waitUntil(resyncPromise);
       }
     }

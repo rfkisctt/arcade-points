@@ -599,7 +599,6 @@ export const COURSES: Course[] = [
   },
 ];
 
-// ── Derived exports ────────────────────────────────────────────────────────
 export const ALL_TAGS = Array.from(
   new Set(COURSES.flatMap((c) => c.tags))
 ).sort();
