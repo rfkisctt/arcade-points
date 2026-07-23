@@ -15,10 +15,6 @@
   <img src="https://img.shields.io/badge/license-AGPL%20v3-555?style=flat-square" alt="License">
 </p>
 
-<p align="center">
-  <a href="https://arcade-pts.vercel.app">arcade-pts.vercel.app</a>
-</p>
-
 ---
 
 ## Features
