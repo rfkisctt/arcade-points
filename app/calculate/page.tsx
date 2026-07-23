@@ -31,7 +31,7 @@ function CalculatePageInner() {
   const [error, setError] = useState<string | null>(null);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [hasExtraBonus] = useState(true);
+  const [hasExtraBonus, setHasExtraBonus] = useState(true);
   const [savedToast, setSavedToast] = useState(false);
 
   const handleFetch = useCallback(async (urlOverride?: string) => {
@@ -309,9 +309,7 @@ function CalculatePageInner() {
               <PointsOverview
                 stats={stats}
                 hasExtraBonus={hasExtraBonus}
-                earnedBadgeTitles={profile.badges
-                  .filter(b => b.category === "Skill Badge")
-                  .map(b => b.title)}
+                setHasExtraBonus={setHasExtraBonus}
               />
             </div>
             <BadgeInventory

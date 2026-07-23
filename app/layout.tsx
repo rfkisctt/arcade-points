@@ -7,12 +7,19 @@ import { SmoothScroll } from "@/components/SmoothScroll";
 export const metadata: Metadata = {
   title: "Arcade Points | Google Cloud Arcade Facilitator 2026 Points Calculator",
   description: "Automatically calculate your Google Cloud Arcade Facilitator 2026 points. Track badges, view your score, and check the public leaderboard.",
+  applicationName: "Arcade Points",
+  authors: [{ name: "Arcade Points", url: "https://arcade-pts.vercel.app" }],
+  creator: "Arcade Points",
+  publisher: "Arcade Points",
   verification: {
     google: "_PhvYjgeuVrpi5hIi78lb8D301iWUjP2BKNNfuQAHMg",
   },
   icons: {
-    icon: "/logo.png",
-    shortcut: "/logo.png",
+    icon: [
+      { url: "/favicon.ico", sizes: "any" },
+      { url: "/logo.png", type: "image/png" },
+    ],
+    shortcut: "/favicon.ico",
     apple: "/logo.png",
   },
   openGraph: {
@@ -46,11 +53,45 @@ export const metadata: Metadata = {
       "x-default": "https://arcade-pts.vercel.app",
     },
   },
+  keywords: [
+    "Google Cloud Arcade",
+    "Arcade Facilitator 2026",
+    "Google Cloud Arcade points calculator",
+    "arcade points tracker",
+    "Google Cloud Skills Boost badges",
+    "arcade facilitator leaderboard",
+  ],
+};
+
+const jsonLd = {
+  "@context": "https://schema.org",
+  "@type": "WebApplication",
+  name: "Arcade Points",
+  url: "https://arcade-pts.vercel.app",
+  description: "Automatically calculate your Google Cloud Arcade Facilitator 2026 points. Track badges, view your score, and check the public leaderboard.",
+  applicationCategory: "UtilitiesApplication",
+  operatingSystem: "All",
+  offers: {
+    "@type": "Offer",
+    price: "0",
+    priceCurrency: "USD",
+  },
+  publisher: {
+    "@type": "Organization",
+    name: "Arcade Points",
+    url: "https://arcade-pts.vercel.app",
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="id">
+      <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+      </head>
       <body className="bg-[#141414] text-[#fafafa] min-h-screen antialiased overflow-x-hidden" suppressHydrationWarning>
 
         <div className="guide-lines" aria-hidden="true">

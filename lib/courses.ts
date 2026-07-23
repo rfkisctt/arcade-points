@@ -18,7 +18,7 @@ const B = (_id: number): undefined => undefined;
 
 export const COURSES: Course[] = [
 
-  //GAMES — July 2026
+  // ══ GAMES — July 2026 ═══════════════════════════════════════════════════
   {
     id: "g-basecamp-jul-2026",
     titleKey: "courses.games.basecamp_jul_2026",
@@ -82,7 +82,7 @@ export const COURSES: Course[] = [
 
 
 
-  //SKILL BADGES — Beginner
+  // ══ SKILL BADGES — Beginner ══════════════════════════════════════════════
   {
     id: "sb-create-manage-cloud",
     titleKey: "courses.skills.create_manage_cloud",
@@ -254,7 +254,7 @@ export const COURSES: Course[] = [
     badgeImageUrl: B(1058),
   },
 
-  //SKILL BADGES — Intermediate
+  // ══ SKILL BADGES — Intermediate ══════════════════════════════════════════
   {
     id: "sb-bq-analyze",
     titleKey: "courses.skills.bq_analyze",
@@ -426,7 +426,7 @@ export const COURSES: Course[] = [
     badgeImageUrl: B(676),
   },
 
-  //SKILL BADGES — Advanced
+  // ══ SKILL BADGES — Advanced ══════════════════════════════════════════════
   {
     id: "sb-vertex-mlops",
     titleKey: "courses.skills.vertex_mlops",
@@ -599,6 +599,7 @@ export const COURSES: Course[] = [
   },
 ];
 
+// ── Derived exports ────────────────────────────────────────────────────────
 export const ALL_TAGS = Array.from(
   new Set(COURSES.flatMap((c) => c.tags))
 ).sort();

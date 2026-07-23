@@ -33,7 +33,6 @@
   font-display: swap;
 }
 
-/* ── Season Mix (display/heading font) ── */
 @font-face {
   font-family: 'seasonMix';
   src: url('/fonts/SeasonMix-Light.otf') format('opentype');

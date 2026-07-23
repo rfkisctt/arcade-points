@@ -19,9 +19,6 @@ export const COMPLETION_BADGE_IMAGE_URLS = new Set<string>([
   "https://cdn.qwiklabs.com/trCZwK0Hdr%2FpsCC0BqzQUWJ97KmXJYa662iHvG4E1wk%3D",
   // Model Armor: Securing AI Deployments (confirmed screenshot)
   "https://cdn.qwiklabs.com/XIa%2F%2Ffn8C0onBFXCyfnjG%2BdWexEicvmuC4MLemRkg5s%3D",
-  // Orchestrate Multi-agent Workflows with Gemini Enterprise
-  // NOTE: gambar = SKILL BADGE, jadi TIDAK masuk completion
-  // "https://cdn.qwiklabs.com/5Ex8C2msJUF%2BDF%2FnKyCze19nMfUf1nB0TVQ42BHtGFk%3D",
   // Scaling with Google Cloud Operations (confirmed screenshot - blue checkmark)
   "https://cdn.qwiklabs.com/coKJmgcXaYPqgGRJMw7chXKe8NrmJjP6nxMtNeLeAX4%3D",
   // Trust and Security with Google Cloud

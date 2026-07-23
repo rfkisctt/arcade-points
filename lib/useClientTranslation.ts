@@ -29,7 +29,7 @@ export function useClientTranslation() {
   if (!mounted) {
     const enT = (key: string, options?: Record<string, unknown>) => {
       const enResources = i18n.getResourceBundle("en", "translation");
-      if (!enResources) return t(key, options); // fallback
+      if (!enResources) return t(key, options);
       const keys = key.split(".");
       let val: any = enResources;
       for (const k of keys) {
