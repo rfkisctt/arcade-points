@@ -37,7 +37,6 @@
 |---|---|
 | Game Badge | +1 per badge |
 | Skill Badge | +0.5 (every 2 = 1 pt) |
-| Trivia | 0 |
 | Milestone 1 (6 Game, 14 Skill) | +7 bonus |
 | Milestone 2 (8 Game, 28 Skill) | +18 bonus |
 | Milestone 3 (10 Game, 42 Skill) | +29 bonus |
