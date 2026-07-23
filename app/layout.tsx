@@ -3,6 +3,7 @@ import "./globals.css";
 import { Navbar, LangProvider } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { SmoothScroll } from "@/components/SmoothScroll";
+import Script from "next/script";
 
 export const metadata: Metadata = {
   title: "Arcade Points | Google Cloud Arcade Facilitator 2026 Points Calculator",
@@ -93,6 +94,16 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         />
       </head>
       <body className="bg-[#141414] text-[#fafafa] min-h-screen antialiased overflow-x-hidden" suppressHydrationWarning>
+
+        <Script src="https://www.googletagmanager.com/gtag/js?id=G-JNHZZJGJ1P" strategy="afterInteractive" />
+        <Script id="google-analytics" strategy="afterInteractive">
+          {`
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-JNHZZJGJ1P');
+          `}
+        </Script>
 
         <div className="guide-lines" aria-hidden="true">
           <div className="guide-lines-inner" />
