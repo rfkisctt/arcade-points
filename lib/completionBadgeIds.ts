@@ -83,6 +83,12 @@ export const COMPLETION_BADGE_IMAGE_URLS = new Set<string>([
   "https://cdn.qwiklabs.com/YZ%2F8nCVNUQAbHdDy7ZmIGFbCurn3i8BiUUNhWNIai4A%3D",
   // Introduction to Cloud Identity
   "https://cdn.qwiklabs.com/qahOBm2tlWmQsp83hDK1jRlZk8PqltRFx9dM5D2aGiY%3D",
+  // AI Boost Bites: Create Your Own Retro Arcade Game
+  "https://cdn.qwiklabs.com/77xMsnOKfqYkDQRaajEihlf7nmmugzv5ORrNtUWx68I%3D",
+  // AI Boost Bootcamp: How to Use Gemini at Work 101
+  "https://cdn.qwiklabs.com/%2FU2jPdjOhNNlWuikaFv9Ccme%2F3zH4dCvMeOc9oFfMqE%3D",
+  // AI Boost Bootcamp: How to Use Gemini for Marketing 201
+  "https://cdn.qwiklabs.com/FKKeH4BvuHxrVToqFdB1pFwwiBNsN6TmkleTFlf20X8%3D",
 ]);
 
 /**
